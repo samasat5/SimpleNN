@@ -1,5 +1,5 @@
 
-from projet_etu import Linear, TanH, Sigmoide, BCELoss, MSELoss, Sequential, CrossEntropyLoss, Optim
+from Functions import Linear, TanH, Sigmoide, BCELoss, MSELoss, Sequential, CrossEntropyLoss, Optim
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
