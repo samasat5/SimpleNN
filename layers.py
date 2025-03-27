@@ -256,10 +256,12 @@ class Optim:  # the wrapper that executes the training loop
         self.net.update_parameters(self.eps)
 
         return loss
-    
-    def SGD(self, X, y, n_epochs=1000, batch_size=10, verbose=True):
+        
+    def SGD(self, X, y, n_epochs=1000, batch_size=10, verbose=True, X_val=None, y_val=None, X_test=None, y_test=None):
         N = X.shape[0]
-        loss_list = []
+        train_loss_list = []
+        val_loss_list = []
+        test_loss_list = []
 
         for epoch in range(n_epochs):
             perm = np.random.permutation(N)
@@ -273,10 +275,34 @@ class Optim:  # the wrapper that executes the training loop
                 loss = self.step(batch_x, batch_y)
                 total_loss += loss
 
-            avg_loss = np.mean(total_loss) 
-            loss_list.append(avg_loss)
-            if verbose and (epoch % 100 == 0 or epoch == n_epochs - 1):
-                print(f"Epoch {epoch} - Loss: {avg_loss:.4f}")
+            avg_loss = np.mean(total_loss)
+            train_loss_list.append(avg_loss)
 
-        return loss_list
+            # Validation and test loss (no backprop)
+            if X_val is not None and y_val is not None:
+                val_pred = self.net.forward(X_val)
+                val_loss = np.mean(self.loss.forward(y_val, val_pred))
+                val_loss_list.append(val_loss)
+            else:
+                val_loss_list.append(None)
+
+            if X_test is not None and y_test is not None:
+                test_pred = self.net.forward(X_test)
+                test_loss = np.mean(self.loss.forward(y_test, test_pred))
+                test_loss_list.append(test_loss)
+            else:
+                test_loss_list.append(None)
+
+            if verbose and (epoch % 100 == 0 or epoch == n_epochs - 1):
+                log = f"Epoch {epoch} - Train Loss: {avg_loss:.4f}"
+                if val_loss_list[-1] is not None:
+                    log += f" | Val Loss: {val_loss:.4f}"
+                if test_loss_list[-1] is not None:
+                    log += f" | Test Loss: {test_loss:.4f}"
+                print(log)
+
+        return train_loss_list, val_loss_list, test_loss_list
+
+        
+
 
