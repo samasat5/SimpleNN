@@ -18,7 +18,6 @@ from enum import Enum
 
 
 
-# TODO : ALL stops after part 3 : to fix
 
 class ExecMode(Enum):
     PART_1 = 1
@@ -199,7 +198,7 @@ def main():
         }
         training_loop_sequential_binary(**training_kwargs)
 
-    elif exec_part_4_flg:
+    if exec_part_4_flg:
 
         print('Running : part 4' + '-' * 50)
 
