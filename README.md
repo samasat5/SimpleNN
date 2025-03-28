@@ -11,9 +11,9 @@ This script supports 4 different training modes:
 | Part | Description                          | Model Type         | Classification |
 |------|--------------------------------------|--------------------|----------------|
 | 1    | Linear model                         | Linear             | Binary         |
-| 2    | Shallow neural network               | Nonlinear (1 hidden layer) | Binary |
-| 3    | Sequential deep neural network       | Multi-layer perceptron     | Binary |
-| 4    | Sequential deep neural network       | Multi-layer perceptron     | Multiclass |
+| 2    | Shallow neural network               | Nonlinear  | Binary |
+| 3    | Sequential deep neural network       | MLP    | Binary |
+| 4    | Sequential deep neural network       | MLP    | Multiclass |
 
 Each part generates random data, trains the model, evaluates it, and plots the training/validation/test loss.
 
