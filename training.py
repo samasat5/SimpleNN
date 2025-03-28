@@ -58,8 +58,10 @@ def training_loop_linear_binary(
         # TODO : at each iteration, show : train and test loss, BUT ALSO train and test accuracy (and keep the final accuracy)
         # if there are too many iterations, you can implement a flag that triggers the validation computation every n_epochs_valid epochs
 
-    # Get the score of the model:
-    model.score(X_test, y_test, Activation_func=None)
+    # Get the test score of the model:
+    model.score(X_test, y_test, Activation_func=None, label="Test")
+    # Get the train score of the model:
+    model.score(X, y, Activation_func=None, label="Train")
     
     plt.plot(train_loss_list, label="Training Loss")
     plt.plot(val_loss_list, label="Validation Loss")
@@ -143,8 +145,11 @@ def training_testing_nonlinear_binary( X, y, X_val, y_val, X_test, y_test, n_epo
         if epoch % 100 == 0 or epoch == n_epochs - 1:
             print(f"Epoch {epoch} - Train: {avg_train_loss:.4f} | Val: {val_loss:.4f} | Test: {test_loss:.4f}")
 
-    # Get the score of the model:
-    model.score(X_test, y_test, Activation_func=act2.forward)
+
+    # Get the test score of the model:
+    model.score(X_test, y_test, Activation_func=act2.forward, label="Test")
+    # Get the train score of the model:
+    model.score(X, y, Activation_func=act2.forward, label="Train")
     
     
     plt.plot(train_loss_list, label="Training Loss")
@@ -222,8 +227,12 @@ def training_loop_sequential_binary(X, y, X_test, y_test, X_val, y_val, n_epochs
     plt.legend()
     plt.grid(True)
     plt.show()
-    # Accuracy
-    model.score(X_test, y_test, Activation_func=Sigmoide().forward)
+    
+
+    # Get the test score of the model:
+    model.score(X_test, y_test, Activation_func=Sigmoide().forward, label="Test")
+    # Get the train score of the model:
+    model.score(X, y, Activation_func=Sigmoide().forward, label="Train")
 
 
     return model 
@@ -244,9 +253,11 @@ def training_loop_sequential_multiclass(X, y, X_test, y_test, X_val, y_val, n_ep
     optimizer = Optim(model, loss_fn, learning_rate)
     train_loss_list, val_loss_list, test_loss_list = optimizer.SGD(X, y, n_epochs=n_epochs, batch_size=batch_size, verbose=True, X_val=X_val, y_val=y_val, X_test=X_test, y_test=y_test)
 
-    # Get the score of the model:
-    model.score(X_test, y_test, Activation_func=Sigmoide().forward)
-    
+    # Get the test score of the model:
+    model.score(X_test, y_test, Activation_func=Sigmoide().forward, label="Test")
+    # Get the train score of the model:
+    model.score(X, y, Activation_func=Sigmoide().forward, label="Train")
+
     # Plot
     plt.plot(train_loss_list, label="Training Loss")
     plt.plot(val_loss_list, label="Validation Loss")
