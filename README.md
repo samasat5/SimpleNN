@@ -35,7 +35,7 @@ This project has four files:
 |------------|-------------------------------------------------|
 | `-p`, `--part` | Select the training part to run. From: `1`, `2`, `3`, `4`, or `all` |
 
-### 🏁 Example Commands
+###  Example Commands
 
 ```bash
 # Run part 1 (linear binary classification)
