@@ -61,21 +61,20 @@ class Linear(object):
             
         return delta @ self._parameters['W'].T    # delta @ W.T (to propagate error backward)
     
-    def score(self, X_test, y_test, Activation_func = None):
-        y_pred = self.forward(X_test)
+    def score(self, X, y, Activation_func=None, label="Test"):
+        y_pred = self.forward(X)
         
         if Activation_func:
             y_pred = Activation_func(y_pred)
         
-        if y_pred.shape[1] == 1:  # Binary classification
+        if y_pred.shape[1] == 1:
             y_pred = (y_pred > 0.5).astype(float)
-            
-        if y_pred.shape[1] > 1:   # Multiclass classification
+        else:
             y_pred = np.argmax(y_pred, axis=1)
-            y_test = np.argmax(y_test, axis=1)  # Converting one-hot to class index
-        
-        acc = np.mean(y_pred == y_test)
-        print(f"\n\nTest Accuracy: {acc * 100:.2f}%\n\n")
+            y = np.argmax(y, axis=1)
+
+        acc = np.mean(y_pred == y)
+        print(f"\n\n{label} Accuracy: {acc * 100:.2f}%\n\n")
         return acc
 
 
@@ -150,21 +149,20 @@ class Sequential(Module):
             structure += line + "\n"
         return structure
     
-    def score(self, X_test, y_test, Activation_func = None):
-        y_pred = self.forward(X_test)
+    def score(self, X, y, Activation_func=None, label="Test"):
+        y_pred = self.forward(X)
         
         if Activation_func:
             y_pred = Activation_func(y_pred)
         
-        if y_pred.shape[1] == 1:  # Binary classification
+        if y_pred.shape[1] == 1:
             y_pred = (y_pred > 0.5).astype(float)
-            
-        if y_pred.shape[1] > 1:   # Multiclass classification
+        else:
             y_pred = np.argmax(y_pred, axis=1)
-            y_test = np.argmax(y_test, axis=1)  # Converting one-hot to class index
-        
-        acc = np.mean(y_pred == y_test)
-        print(f"\n\nTest Accuracy: {acc * 100:.2f}%\n\n")
+            y = np.argmax(y, axis=1)
+
+        acc = np.mean(y_pred == y)
+        print(f"\n\n{label} Accuracy: {acc * 100:.2f}%\n\n")
         return acc
 
 
