@@ -1,4 +1,7 @@
-# Neural Network Project - ML Course - Feb 2025
+# Intro to Neural Network: A Simple Implementation 
+ML Course 
+
+Feb 2025
 
 This project is a deep learning framework implemented from scratch in Python . It follows a modular design, where each neural network layer is treated as a reusable Module class, supporting manual forward and backward propagation — similar to early PyTorch-style frameworks, but built entirely from the ground up.
 
@@ -12,8 +15,8 @@ This script supports 4 different training modes:
 |------|--------------------------------------|--------------------|----------------|
 | 1    | Linear model                         | Linear             | Binary         |
 | 2    | Shallow neural network               | Nonlinear  | Binary |
-| 3    | Sequential deep neural network       | MLP    | Binary |
-| 4    | Sequential deep neural network       | MLP    | Multiclass |
+| 3    | Deep neural network       | MLP    | Binary |
+| 4    | Deep neural network       | MLP    | Multiclass |
 
 Each part generates random data, trains the model, evaluates it, and plots the training/validation/test loss.
 
