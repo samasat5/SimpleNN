@@ -11,6 +11,7 @@ import argparse
 from enum import Enum
 
 
+# Review: 
 # Size of the main matrices in the NN:
 # X ∈ (batch_size, input_dim)
 # W ∈ (output_dim, input_dim)
