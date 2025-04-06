@@ -1,4 +1,6 @@
 import numpy as np
+from data_utils import init_random_seed
+import pdb
 
 
 #-----------------------------------------
@@ -12,6 +14,7 @@ class Linear(object):
     # y ∈ (batch_size, output_dim) 
     # yhat ∈ (batch_size, output_dim) 
     def __init__(self, input_dim, output_dim):
+        init_random_seed()
         self._parameters = {
             'W': np.random.randn(input_dim, output_dim) * 0.01,
             'b': np.zeros((1, output_dim))}
@@ -73,8 +76,9 @@ class Linear(object):
             y_pred = np.argmax(y_pred, axis=1)
             y = np.argmax(y, axis=1)
 
+
         acc = np.mean(y_pred == y)
-        print(f"\n\n{label} Accuracy: {acc * 100:.2f}%\n\n")
+        print(f"{label} Accuracy: {acc * 100:.2f}%")
         return acc
 
 
@@ -84,6 +88,7 @@ class Linear(object):
 
 class Module:
     def __init__(self):
+        # init_random_seed()
         self._parameters = None
         self._gradient = None
 
@@ -110,6 +115,7 @@ class Sequential(Module):
     def __init__(self, *modules):
         super().__init__()
         self.modules = modules
+        # init_random_seed()
 
     def forward(self, X):
         for module in self.modules:
@@ -156,11 +162,13 @@ class Sequential(Module):
             y_pred = Activation_func(y_pred)
         
         if y_pred.shape[1] == 1:
-            y_pred = (y_pred > 0.5).astype(float)
+            y_pred = (y_pred > 0.5).astype(int).flatten()
+            y = y.astype(int).flatten()
+
         else:
             y_pred = np.argmax(y_pred, axis=1)
             y = np.argmax(y, axis=1)
-
+        
         acc = np.mean(y_pred == y)
         print(f"\n\n{label} Accuracy: {acc * 100:.2f}%\n\n")
         return acc

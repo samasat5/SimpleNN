@@ -4,7 +4,7 @@ class MSELoss(object):
     def forward(self, y, yhat):
         # Shape: y.shape must match yhat.shape
         assert y.shape == yhat.shape
-        
+
         return np.sum((y - yhat) ** 2, axis=1)  # shape: (batch_size,)
 
     def backward(self, y, yhat):
@@ -16,7 +16,8 @@ class BCELoss(object):
         yhat = np.clip(yhat, 1e-8, 1 - 1e-8) # Avoid log(0)
         self.y = y
         self.yhat = yhat
-        return - (y * np.log(yhat) + (1 - y) * np.log(1 - yhat)).mean(axis=1)
+        # return - (y * np.log(yhat) + (1 - y) * np.log(1 - yhat)).mean(axis=1)
+        return - (y * np.log(yhat) + (1 - y) * np.log(1 - yhat))
 
     def backward(self, y, yhat):
         yhat = np.clip(yhat, 1e-8, 1 - 1e-8)

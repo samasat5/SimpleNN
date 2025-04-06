@@ -1,9 +1,10 @@
 
-from training import training_loop_linear_binary, training_testing_nonlinear_binary, training_loop_sequential_binary, training_loop_sequential_multiclass
+from training import training_loop_linear_binary, training_testing_nonlinear_binary, training_testing_sequential_binary, training_testing_sequential_multiclass
 from losses import BCELoss, MSELoss, CrossEntropyLoss
 from layers import Linear, TanH, Sigmoide, Sequential, Optim
+from param_search import param_search_p1, param_search_p2, param_search_p3, param_search_p4
+from data_utils import data_creation, init_random_seed
 import numpy as np
-from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import sys
 import argparse
@@ -36,82 +37,21 @@ INPUT_ARGS_TO_EXEC_MODE = {
     "all": ExecMode.ALL_PARTS,
 }
 
-def init_random_seed():
-    np.random.seed(0)
 
 
 
 
-#-----------------------------------------
-# Data Creation:--------------------------
-#-----------------------------------------
 
-"""
-def data_creation(N=300, input_dim=5, n_classes=1, test_size=0.2):
-    X = np.random.randn(N, input_dim)
-    W = np.random.randn(input_dim, n_classes)
-    b = np.random.randn(1, n_classes)
-    logits = X @ W + b
-
-    if n_classes > 1:
-        y = np.argmax(logits + 0.1 * np.random.randn(*logits.shape), axis=1)
-        y = np.eye(n_classes)[y]  # One-hot encoding
-
-    else:
-        probs = 1 / (1 + np.exp(-logits))
-        y = (probs > 0.5).astype(float)
-
-    #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
-
-    # Let's say X and y are your features and labels
-    # First, split off the test set
-    X_temp, X_test, y_temp, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-    # Then, split the remaining data into train and validation
-    X_train, X_val, y_train, y_val = train_test_split(X_temp, y_temp, test_size=0.25, random_state=42)
-    # 0.25 x 0.8 = 0.2 => 60% train, 20% val, 20% test
-
-
-    return X_train, X_test, y_train, y_test
-"""
-
-def data_creation(N=300, input_dim=5, n_classes=1, train_size=0.6, val_size=0.2, test_size=0.2):
-
-    assert abs(train_size + val_size + test_size - 1.0) < 1e-6, "Splits must add up to 1."
-
-    X = np.random.randn(N, input_dim)
-    W = np.random.randn(input_dim, n_classes)
-    b = np.random.randn(1, n_classes)
-    logits = X @ W + b + 0.5 * np.random.randn(1, n_classes) 
-
-    if n_classes > 1:
-        y = np.argmax(logits + 0.1 * np.random.randn(*logits.shape), axis=1)
-        y = np.eye(n_classes)[y]  # One-hot encoding
-    else:
-        probs = 1 / (1 + np.exp(-logits))
-        y = (probs > 0.5).astype(float)
-
-    # First, split off the test set
-    X_temp, X_test, y_temp, y_test = train_test_split(
-        X, y, test_size=test_size, random_state=42
-    )
-
-    # Compute adjusted val size relative to the remaining (train + val)
-    val_ratio = val_size / (train_size + val_size)
-
-    X_train, X_val, y_train, y_val = train_test_split(
-        X_temp, y_temp, test_size=val_ratio, random_state=42
-    )
-
-    return X_train, X_val, X_test, y_train, y_val, y_test
 
 
 def get_input_args():
     parser = argparse.ArgumentParser(description="Greet someone with a custom message.")
     parser.add_argument("-p", "--part", required=True, type=str, default=None,
                         help=f"Select the part to trigger. Valid modes: {VALID_INPUT_ARG}")
+    parser.add_argument("--search", type=str, default=None,
+                        help="Specify hyperparameter to search: 'learning_rate', 'batch_size', 'l2_lambda', 'n_epochs'")
     args = parser.parse_args()
-    return {"part": args.part}
+    return {"part": args.part, "search": args.search}
 
 def get_exec_mode(args):
     arg_part = args["part"]
@@ -122,6 +62,7 @@ def get_exec_mode(args):
 def main():
     args = get_input_args()
     exec_mode = get_exec_mode(args)
+    search_param = args.get("search")
 
     exec_part_1_flg = exec_mode in [ExecMode.PART_1, ExecMode.ALL_PARTS]
     exec_part_2_flg = exec_mode in [ExecMode.PART_2, ExecMode.ALL_PARTS]
@@ -130,11 +71,10 @@ def main():
 
 
     if exec_part_1_flg:
-        print('Running : part 1' + '-' * 50)
+        print('\nRunning : part 1' + '-' * 80)
 
         create_data_kwargs = {
-            'N': 2000, 'input_dim': 5, 'n_classes': 1, 'train_size': 0.6, 'val_size': 0.2, 'test_size': 0.2,
-        }
+            'N': 300, 'input_dim': 5, 'n_classes': 1, 'train_size': 0.6, 'val_size': 0.2, 'test_size': 0.2}
         X_train, X_val, X_test, y_train, y_val, y_test = data_creation(**create_data_kwargs)
 
         training_kwargs = {
@@ -145,18 +85,51 @@ def main():
             'X_test': X_test,
             'y_test': y_test,
             'n_epochs': 1000,
-            'learning_rate': 1e-2,
+            'learning_rate': 2e-02,
             'batch_size': 10,
             'input_dim': 5,
-            'output_dim': 1
+            'output_dim': 1,
+            'loss_print': True,
+            'min_val_search': False
         }
-        training_loop_linear_binary(**training_kwargs)
+        if search_param == "learning_rate":
+            print(f"\n\ntraining the model with random hyper param:\n\n")
+            training_loop_linear_binary(**training_kwargs)
+            best_nb_epochs, best_lr = param_search_p1(
+                param="learning_rate",
+                X_train=X_train,
+                X_val=X_val,
+                X_test=X_test,
+                y_train=y_train,
+                y_val=y_val,
+                y_test=y_test)            
+            print(f"\n\ntraining the model with the obtained hyper param:\n\n")
+            training_kwargs = {
+                'X': X_train,
+                'y': y_train,
+                'X_val': X_val,
+                'y_val': y_val,
+                'X_test': X_test,
+                'y_test': y_test,
+                'n_epochs': best_nb_epochs,
+                'learning_rate': best_lr,
+                'batch_size': 10,
+                'input_dim': 5,
+                'output_dim': 1,
+                'loss_print': True,
+                'min_val_search': False}
+            training_loop_linear_binary(**training_kwargs)
+            
+            
+        else:
+            training_loop_linear_binary(**training_kwargs)
+
 
 
     if exec_part_2_flg:
         print('Running : part 2' + '-' * 50)
 
-        create_data_kwargs = {'N': 300, 'input_dim': 5, 'n_classes': 1, 'test_size': 0.2}
+        create_data_kwargs = {'N': 300, 'input_dim': 5, 'n_classes': 1, 'train_size': 0.6, 'val_size': 0.2, 'test_size': 0.2}
         X_train, X_val, X_test, y_train, y_val, y_test = data_creation(**create_data_kwargs)
 
         training_kwargs = {
@@ -167,19 +140,51 @@ def main():
             'X_test': X_test,
             'y_test': y_test,
             'n_epochs': 1000,
-            'learning_rate': 1e-2,
+            'learning_rate': 10e-2,
             'batch_size': 10,
             'input_dim': 5,
             'output_dim': 1,
             'middle_dim': 5,
+            'loss_print': True
         }
-        training_testing_nonlinear_binary(**training_kwargs)
+        
+        
+        if search_param == "learning_rate":
+            print(f"\n\ntraining the model with random hyper param:\n\n")
+            training_testing_nonlinear_binary(**training_kwargs)
+            best_nb_epochs, best_lr = param_search_p2(
+                param="learning_rate",
+                X_train=X_train,
+                X_val=X_val,
+                X_test=X_test,
+                y_train=y_train,
+                y_val=y_val,
+                y_test=y_test)            
+            print(f"\n\ntraining the model with the obtained hyper param:\n\n")
+            training_kwargs = {
+                'X': X_train,
+                'y': y_train,
+                'X_val': X_val,
+                'y_val': y_val,
+                'X_test': X_test,
+                'y_test': y_test,
+                'n_epochs': best_nb_epochs,
+                'learning_rate': best_lr,
+                'batch_size': 10,
+                'input_dim': 5,
+                'output_dim': 1,
+                'loss_print': True}
+            training_testing_nonlinear_binary(**training_kwargs)
+            
+        if search_param == None:
+            training_testing_nonlinear_binary(**training_kwargs)
+
 
     if exec_part_3_flg:
 
         print('Running : part 3' + '-' * 50)
 
-        create_data_kwargs = {'N': 300, 'input_dim': 5, 'n_classes': 1, 'test_size': 0.2}
+        create_data_kwargs = {'N': 300, 'input_dim': 5, 'n_classes': 1, 'train_size': 0.6, 'val_size': 0.2, 'test_size': 0.2}
         X_train, X_val, X_test, y_train, y_val, y_test = data_creation(**create_data_kwargs)
 
         training_kwargs = {
@@ -189,20 +194,49 @@ def main():
             'y_test': y_test,
             'X_val': X_val,
             'y_val': y_val,
-            'n_epochs': 1000,
-            'learning_rate': 1e-2,
+            'n_epochs': 4000,
+            'learning_rate': 1e-0,
             'batch_size': 10,
             'input_dim': 5,
             'output_dim': 1,
             'middle_dim': 3,
+            'loss_print': True
         }
-        training_loop_sequential_binary(**training_kwargs)
+        if search_param == "learning_rate":
+            print(f"\n\ntraining the model with random hyper param:\n\n")
+            training_testing_sequential_binary(**training_kwargs)
+            best_nb_epochs, best_lr = param_search_p3(
+                param="learning_rate",
+                X_train=X_train,
+                X_val=X_val,
+                X_test=X_test,
+                y_train=y_train,
+                y_val=y_val,
+                y_test=y_test)            
+            print(f"\n\ntraining the model with the obtained hyper param:\n\n")
+            training_kwargs = {
+                'X': X_train,
+                'y': y_train,
+                'X_val': X_val,
+                'y_val': y_val,
+                'X_test': X_test,
+                'y_test': y_test,
+                'n_epochs': best_nb_epochs,
+                'learning_rate': best_lr,
+                'batch_size': 10,
+                'input_dim': 5,
+                'output_dim': 1,
+                'loss_print': True}
+            training_testing_sequential_binary(**training_kwargs)
+            
+        if search_param == None:
+            training_testing_sequential_binary(**training_kwargs)
 
     if exec_part_4_flg:
 
         print('Running : part 4' + '-' * 50)
 
-        create_data_kwargs = {'N': 300, 'input_dim': 5, 'n_classes': 3, 'test_size': 0.2}
+        create_data_kwargs = {'N': 300, 'input_dim': 5, 'n_classes': 3, 'train_size': 0.6, 'val_size': 0.2, 'test_size': 0.2}
         X_train, X_val, X_test, y_train, y_val, y_test = data_creation(**create_data_kwargs)
 
         training_kwargs = {
@@ -212,17 +246,78 @@ def main():
             'y_val': y_val,
             'X_test': X_test,
             'y_test': y_test,
-            'n_epochs': 1000,
-            'learning_rate': 1e-2,
-            'batch_size': 10,
+            'n_epochs': 100,
+            'learning_rate': 0.99,
+            'batch_size': 30,
             'input_dim': 5,
             'output_dim': 3,
             'middle_dim': 7,
+            'loss_print': True
         }
-        training_loop_sequential_multiclass(**training_kwargs)
-
-    else:
-        raise RuntimeError()
+        
+        if search_param == "learning_rate":
+            print(f"\n\ntraining the model with random hyper param:\n\n")
+            training_testing_sequential_multiclass(**training_kwargs)
+            best_nb_epochs, best_lr = param_search_p4(
+                param="learning_rate",
+                X_train=X_train,
+                X_val=X_val,
+                X_test=X_test,
+                y_train=y_train,
+                y_val=y_val,
+                y_test=y_test)            
+            print(f"\n\ntraining the model with the obtained hyper param:\n\n")
+            training_kwargs = {
+                'X': X_train,
+                'y': y_train,
+                'X_val': X_val,
+                'y_val': y_val,
+                'X_test': X_test,
+                'y_test': y_test,
+                'n_epochs': best_nb_epochs,
+                'learning_rate': best_lr,
+                'batch_size': 30,
+                'input_dim': 5,
+                'output_dim': 3,
+                'loss_print': True}
+            training_testing_sequential_multiclass(**training_kwargs)
+            
+            
+        if search_param == "middle_dim":
+            print(f"\n\ntraining the model with random hyper param:\n\n")
+            training_testing_sequential_multiclass(**training_kwargs)
+            best_nb_epochs, best_dim = param_search_p4(
+                param="middle_dim",
+                X_train=X_train,
+                X_val=X_val,
+                X_test=X_test,
+                y_train=y_train,
+                y_val=y_val,
+                y_test=y_test)            
+            print(f"\n\ntraining the model with the obtained hyper param:\n\n")
+            training_kwargs = {
+                'X': X_train,
+                'y': y_train,
+                'X_val': X_val,
+                'y_val': y_val,
+                'X_test': X_test,
+                'y_test': y_test,
+                'n_epochs': best_nb_epochs,
+                'learning_rate': 0.2,
+                'batch_size': 30,
+                'input_dim': 5,
+                'output_dim': 3,
+                'middle_dim': best_dim,
+                'loss_print': True}
+            training_testing_sequential_multiclass(**training_kwargs)
+            
+        if search_param == None:
+            training_testing_sequential_multiclass(**training_kwargs)
+            
+            
+            
+    # else:
+    #     raise RuntimeError()
 
 
 

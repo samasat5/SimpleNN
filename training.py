@@ -3,15 +3,18 @@ from layers import Linear, TanH, Sigmoide, Sequential, Optim, Softmax
 import numpy as np
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
-
+import pdb
+import copy
 
 #-----------------------------------------
 # 1- Mon Premier Est Linéaire:------------
 #-----------------------------------------
 def training_loop_linear_binary(
-        X, y, X_val, y_val, X_test, y_test, n_epochs = 1000, learning_rate = 1e-2, batch_size = 10, input_dim = 3, output_dim = 1
+        X, y, X_val, y_val, X_test, y_test, n_epochs = 1000, learning_rate = 1e-2, batch_size = 10, input_dim = 3, output_dim = 1, loss_print = False, min_val_search = False
 ):
 
+    print(f"Hyper parametrs of the model: - number of epochs: {n_epochs}, learning rate: {learning_rate:.4e}, batch size: {batch_size}:")
+    
     # define the structure of the NN:
     model = Linear(input_dim, output_dim)
     loss_fn = MSELoss()
@@ -21,12 +24,19 @@ def training_loop_linear_binary(
     train_loss_list = []
     val_loss_list = []
     test_loss_list = []
+    min_epoch_val_min = None
     
+    val_min_loss_per_epoch_list = []
+    
+    best_model = None
+    best_val_loss = float('inf')
+
     for epoch in range(n_epochs):
         perm = np.random.permutation(N) # shuffling the data
         X_shuffled = X[perm]
         y_shuffled = y[perm]
         total_train_loss = 0
+        new_loss = []
         for i in range(0, N, batch_size):
             batch_x = X_shuffled[i:i+batch_size]
             batch_y = y_shuffled[i:i+batch_size]
@@ -34,54 +44,77 @@ def training_loop_linear_binary(
             y_pred = model.forward(batch_x)
             loss = loss_fn.forward(batch_y, y_pred)
             total_train_loss += np.mean(loss)
+            new_loss.append(loss)
             # Backward:
             delta = loss_fn.backward(batch_y, y_pred)
             model.zero_grad()
             model.backward_update_gradient(batch_x, delta)
             model.update_parameters(learning_rate)
 
-
         avg_train_loss = total_train_loss / (N / batch_size)
         train_loss_list.append(avg_train_loss)
         
         # Validation and test losses
         val_pred = model.forward(X_val)
-        val_loss = np.mean(loss_fn.forward(y_val, val_pred))
+        mse_val = loss_fn.forward(y_val, val_pred)
+        val_loss = np.mean(mse_val)
+        # best_model: avoid overfit
         val_loss_list.append(val_loss)
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            best_model = copy.deepcopy(model)
 
         test_pred = model.forward(X_test)
         test_loss = np.mean(loss_fn.forward(y_test, test_pred))
         test_loss_list.append(test_loss)
-        if epoch % 100 == 0 or epoch == n_epochs - 1:
-            print(f"Epoch {epoch} - Train: {avg_train_loss:.4f} | Val: {val_loss:.4f} | Test: {test_loss:.4f}")
-
-        # TODO : at each iteration, show : train and test loss, BUT ALSO train and test accuracy (and keep the final accuracy)
-        # if there are too many iterations, you can implement a flag that triggers the validation computation every n_epochs_valid epochs
-
+        
+        if loss_print == True: 
+            if epoch % 100 == 0 or epoch == n_epochs - 1:
+                print(f"Epoch {epoch} - Losses: | Train: {avg_train_loss:.4f} | Val: {val_loss:.4f} | Test: {test_loss:.4f}")
+                
+        
+        
+        
     # Get the test score of the model:
     model.score(X_test, y_test, Activation_func=None, label="Test")
     # Get the train score of the model:
     model.score(X, y, Activation_func=None, label="Train")
     
-    plt.plot(train_loss_list, label="Training Loss")
-    plt.plot(val_loss_list, label="Validation Loss")
-    plt.plot(test_loss_list, label="Test Loss", linestyle='--')
-    plt.xlabel("Epoch")
-    plt.ylabel("Loss")
-    plt.title("Loss Curves of a Linear Binary Classifier (question1)")
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+    
+    if loss_print == True:
+        plt.plot(train_loss_list, label="Training Loss")
+        plt.plot(val_loss_list, label="Validation Loss")
+        plt.xlabel("Epoch")
+        plt.ylabel("MSE Loss")
+        plt.title("Training of a Linear Binary Classifier")
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+    
+    if min_val_search == True: 
+        min_val_loss = min(val_loss_list)
+        val_min_loss_per_epoch_list.append(min_val_loss)
+        min_epoch_val_min = np.argmin(val_loss_list)
+        if loss_print == True: 
+            print(f"\nSearching the best timestep to stop (for the better generalisation) before we overfit:------------------")
+            print(f"=> As shown in the plot, we would better stop at the epoch {min_epoch_val_min} out of {n_epochs} epochs, the val loss is the min")
+            plt.plot(val_loss_list, label="Val Loss")
+            plt.xlabel("Epoch")
+            plt.ylabel("MSE Loss")
+            plt.title("min Val Loss progression for epochs")
+            plt.legend()
+            plt.grid(True)
+            plt.show()
 
-
-    return model
+    
+    return train_loss_list, val_loss_list, min_epoch_val_min, best_model
 
 
 
 #-----------------------------------------
 # 2- Mon Second Est Nonlinéaire:----------
 #-----------------------------------------
-def training_testing_nonlinear_binary( X, y, X_val, y_val, X_test, y_test, n_epochs = 1000, learning_rate = 1e-2, batch_size = 10, input_dim = 5, output_dim = 1, middle_dim = 5):
+def training_testing_nonlinear_binary(X, y, X_val, y_val, X_test, y_test, n_epochs = 1000, learning_rate = 1e-2, batch_size = 10, input_dim = 5, output_dim = 1, middle_dim = 5, loss_print = None):
     
     # define the structure of the NN:
     lin1 = Linear(input_dim, middle_dim)
@@ -99,6 +132,7 @@ def training_testing_nonlinear_binary( X, y, X_val, y_val, X_test, y_test, n_epo
     train_loss_list = []
     test_loss_list = []
     val_loss_list = []
+
     for epoch in range(n_epochs):
         perm = np.random.permutation(N) 
         X_shuffled = X[perm]
@@ -142,8 +176,9 @@ def training_testing_nonlinear_binary( X, y, X_val, y_val, X_test, y_test, n_epo
         test_pred = model.forward(X_test)
         test_loss = np.mean(loss_fn.forward(y_test, test_pred))
         test_loss_list.append(test_loss)
-        if epoch % 100 == 0 or epoch == n_epochs - 1:
-            print(f"Epoch {epoch} - Train: {avg_train_loss:.4f} | Val: {val_loss:.4f} | Test: {test_loss:.4f}")
+        if loss_print == True: 
+            if epoch % 100 == 0 or epoch == n_epochs - 1:
+                print(f"Epoch {epoch} - Losses: | Train: {avg_train_loss:.4f} | Val: {val_loss:.4f} | Test: {test_loss:.4f}")
 
 
     # Get the test score of the model:
@@ -151,24 +186,24 @@ def training_testing_nonlinear_binary( X, y, X_val, y_val, X_test, y_test, n_epo
     # Get the train score of the model:
     model.score(X, y, Activation_func=act2.forward, label="Train")
     
-    
-    plt.plot(train_loss_list, label="Training Loss")
-    plt.plot(val_loss_list, label="Validation Loss")
-    plt.plot(test_loss_list, label="Test Loss", linestyle='--')
-    plt.xlabel("Epoch")
-    plt.ylabel("Loss")
-    plt.title("Loss Curves of a Nonlinear Binary Classifier (question2)")
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+    if loss_print == True:
+        plt.plot(train_loss_list, label="Training Loss")
+        plt.plot(val_loss_list, label="Validation Loss")
+        # plt.plot(test_loss_list, label="Test Loss", linestyle='--')
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss")
+        plt.title("Loss Curves of a Nonlinear Binary Classifier")
+        plt.legend()
+        plt.grid(True)
+        plt.show()
 
 
-    return model
+    return train_loss_list, val_loss_list
 
 #-----------------------------------------
 # 3- Mon Troisième Est un Encapsulage:----
 #-----------------------------------------
-def training_loop_sequential_binary(X, y, X_test, y_test, X_val, y_val, n_epochs = 1000, learning_rate = 1e-2, batch_size = 10, input_dim = 3, output_dim = 1, middle_dim = 7):
+def training_testing_sequential_binary(X, y, X_test, y_test, X_val, y_val, n_epochs = 1000, learning_rate = 1e-2, batch_size = 10, input_dim = 3, output_dim = 1, middle_dim = 7,loss_print=False):
     
     # define the structure of the NN:
     model = Sequential(Linear(input_dim, middle_dim), TanH(), Linear(middle_dim, output_dim), Sigmoide())
@@ -179,7 +214,7 @@ def training_loop_sequential_binary(X, y, X_test, y_test, X_val, y_val, n_epochs
     
     # define the training loop:
     N = X.shape[0]
-    avg_train_list = []
+    train_loss_list = []
     val_loss_list = []
     test_loss_list = []
     
@@ -202,7 +237,7 @@ def training_loop_sequential_binary(X, y, X_test, y_test, X_val, y_val, n_epochs
             model.update_parameters(learning_rate)
             
         avg_train_loss = total_train_loss / (N / batch_size)
-        avg_train_list.append(avg_train_loss)
+        train_loss_list.append(avg_train_loss)
 
         # validation loss (no backprop here!)
         val_pred = model.forward(X_val)
@@ -214,33 +249,34 @@ def training_loop_sequential_binary(X, y, X_test, y_test, X_val, y_val, n_epochs
         test_loss = loss_fn.forward(y_test, test_pred).mean()
         test_loss_list.append(test_loss)
 
-        if epoch % 100 == 0 or epoch == n_epochs - 1:
-            print(f"Epoch {epoch} - Train Loss: {avg_train_loss:.4f} | Val Loss: {val_loss:.4f}")
+        if loss_print == True:
+            if epoch % 100 == 0 or epoch == n_epochs - 1:
+                print(f"Epoch {epoch} - Train Loss: {avg_train_loss:.4f} | Val Loss: {val_loss:.4f}")
 
-    
-    plt.plot(avg_train_list, label="Training Loss")
-    plt.plot(val_loss_list, label="Validation Loss")
-    plt.plot(test_loss_list, label="Test Loss", linestyle="--")
-    plt.xlabel("Epoch")
-    plt.ylabel("Loss")
-    plt.title("Loss Curves of a Sequential model of Binary Classifier (question3)")
-    plt.legend()
-    plt.grid(True)
-    plt.show()
-    
 
+    if loss_print == True:
+        plt.plot(train_loss_list, label="Training Loss")
+        plt.plot(val_loss_list, label="Validation Loss")
+        # plt.plot(test_loss_list, label="Test Loss", linestyle="--")
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss")
+        plt.title("Loss Curves of a Sequential model of Binary Classifier")
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+    
     # Get the test score of the model:
     model.score(X_test, y_test, Activation_func=Sigmoide().forward, label="Test")
     # Get the train score of the model:
     model.score(X, y, Activation_func=Sigmoide().forward, label="Train")
+    
 
-
-    return model 
+    return train_loss_list, val_loss_list
 #-----------------------------------------
 # 4- Mon Quatrième Est Multi-classe:------
 #-----------------------------------------
 
-def training_loop_sequential_multiclass(X, y, X_test, y_test, X_val, y_val, n_epochs = 1000, learning_rate = 1e-2, batch_size = 10, input_dim = 5, output_dim = 3, middle_dim = 7):
+def training_testing_sequential_multiclass(X, y, X_test, y_test, X_val, y_val, n_epochs = 1000, learning_rate = 1e-2, batch_size = 10, input_dim = 5, output_dim = 3, middle_dim = 7,loss_print=False):
 
     # define the structure of the NN:
     model = Sequential(Linear(input_dim, middle_dim), TanH(), Linear(middle_dim, output_dim))
@@ -251,7 +287,7 @@ def training_loop_sequential_multiclass(X, y, X_test, y_test, X_val, y_val, n_ep
     
     # define the wrapper and training loop:
     optimizer = Optim(model, loss_fn, learning_rate)
-    train_loss_list, val_loss_list, test_loss_list = optimizer.SGD(X, y, n_epochs=n_epochs, batch_size=batch_size, verbose=True, X_val=X_val, y_val=y_val, X_test=X_test, y_test=y_test)
+    train_loss_list, val_loss_list, test_loss_list = optimizer.SGD(X, y, n_epochs=n_epochs, batch_size=batch_size, verbose=loss_print, X_val=X_val, y_val=y_val, X_test=X_test, y_test=y_test )
 
     # Get the test score of the model:
     model.score(X_test, y_test, Activation_func=Sigmoide().forward, label="Test")
@@ -259,12 +295,15 @@ def training_loop_sequential_multiclass(X, y, X_test, y_test, X_val, y_val, n_ep
     model.score(X, y, Activation_func=Sigmoide().forward, label="Train")
 
     # Plot
-    plt.plot(train_loss_list, label="Training Loss")
-    plt.plot(val_loss_list, label="Validation Loss")
-    plt.plot(test_loss_list, label="Test Loss", linestyle='--')
-    plt.xlabel("Epoch")
-    plt.ylabel("Loss")
-    plt.title("Loss Curves of a Sequential model of Multiclass Classifier (question4)")
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+    if loss_print!=False :
+        plt.plot(train_loss_list, label="Training Loss")
+        plt.plot(val_loss_list, label="Validation Loss")
+        # plt.plot(test_loss_list, label="Test Loss", linestyle='--')
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss")
+        plt.title("Loss Curves of a Sequential model of Multiclass Classifier")
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+    
+    return train_loss_list, val_loss_list
