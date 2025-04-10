@@ -24,7 +24,7 @@ This project has four files:
 - `layers.py` – Defines the linear and nonlinear neural network layers (e.g., Linear, TanH, Sigmoide, Softmax, and Sequential)
 - `losses.py` – Contains loss function implementations  (e.g., MSE, BCE, Cross-Entropy)
 - `training.py` – Implements training loops for all parts   (binary & multiclass, linear & nonlinear)
-- `test_proj.py` – Main file for running and testing models
+- `main.py` – Main file for running and testing models
 
 
 
@@ -38,12 +38,14 @@ This project has four files:
 |------------|-------------------------------------------------|
 | `-p`, `--part` | Select the training part to run. From: `1`, `2`, `3`, `4`, or `all` |
 
+python main.py -p <part_number> [--search <param_name>]
+
 ###  Example Commands
 
 ```bash
 # Run part 1 (linear binary classification)
-python test_proj.py -p 1
+python main.py -p 1
 
 
 # Run all parts
-python test_proj.py -p all
+python main.py -p all
