@@ -45,9 +45,11 @@ python main.py -p <part_number> [--search <param_name>]
 ###  Example Commands
 
 ```bash
-# Run part 1 (linear binary classification)
+# Run part 1 with the optimized hyper params (linear binary classification)
 python main.py -p 1
 
+# Run the hyper parameter search on the part 1
+python main.py -p 1 --search "learning_rate"
 
 # Run all parts
 python main.py -p all
