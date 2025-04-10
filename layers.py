@@ -303,8 +303,7 @@ class Optim:  # the wrapper that executes the training loop
                 log = f"Epoch {epoch} - Train Loss: {avg_loss:.4f}"
                 if val_loss_list[-1] is not None:
                     log += f" | Val Loss: {val_loss:.4f}"
-                if test_loss_list[-1] is not None:
-                    log += f" | Test Loss: {test_loss:.4f}"
+
                 print(log)
 
         return train_loss_list, val_loss_list, test_loss_list

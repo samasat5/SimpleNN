@@ -10,7 +10,7 @@ import copy
 # 1- Mon Premier Est Linéaire:------------
 #-----------------------------------------
 def training_loop_linear_binary(
-        X, y, X_val, y_val, X_test, y_test, n_epochs = 1000, learning_rate = 1e-2, batch_size = 10, input_dim = 3, output_dim = 1, loss_print = False, min_val_search = False
+        X, y, X_val, y_val, X_test, y_test, n_epochs = 1000, learning_rate = 1e-2, batch_size = 10, input_dim = 3, output_dim = 1, loss_print = False
 ):
 
     print(f"Hyper parametrs of the model: - number of epochs: {n_epochs}, learning rate: {learning_rate:.4e}, batch size: {batch_size}:")
@@ -26,7 +26,7 @@ def training_loop_linear_binary(
     test_loss_list = []
     min_epoch_val_min = None
     
-    val_min_loss_per_epoch_list = []
+    # val_min_loss_per_epoch_list = []
     
     best_model = None
     best_val_loss = float('inf')
@@ -70,7 +70,7 @@ def training_loop_linear_binary(
         
         if loss_print == True: 
             if epoch % 100 == 0 or epoch == n_epochs - 1:
-                print(f"Epoch {epoch} - Losses: | Train: {avg_train_loss:.4f} | Val: {val_loss:.4f} | Test: {test_loss:.4f}")
+                print(f"Epoch {epoch} - Losses: | Train: {avg_train_loss:.4f} | Val: {val_loss:.4f}")
                 
         
         
@@ -91,23 +91,23 @@ def training_loop_linear_binary(
         plt.grid(True)
         plt.show()
     
-    if min_val_search == True: 
-        min_val_loss = min(val_loss_list)
-        val_min_loss_per_epoch_list.append(min_val_loss)
-        min_epoch_val_min = np.argmin(val_loss_list)
-        if loss_print == True: 
-            print(f"\nSearching the best timestep to stop (for the better generalisation) before we overfit:------------------")
-            print(f"=> As shown in the plot, we would better stop at the epoch {min_epoch_val_min} out of {n_epochs} epochs, the val loss is the min")
-            plt.plot(val_loss_list, label="Val Loss")
-            plt.xlabel("Epoch")
-            plt.ylabel("MSE Loss")
-            plt.title("min Val Loss progression for epochs")
-            plt.legend()
-            plt.grid(True)
-            plt.show()
+    # if min_val_search == True: 
+    #     min_val_loss = min(val_loss_list)
+    #     val_min_loss_per_epoch_list.append(min_val_loss)
+    #     min_epoch_val_min = np.argmin(val_loss_list)
+    #     if loss_print == True: 
+    #         print(f"\nSearching the best timestep to stop (for the better generalisation) before we overfit:------------------")
+    #         print(f"=> As shown in the plot, we would better stop at the epoch {min_epoch_val_min} out of {n_epochs} epochs, the val loss is the min")
+    #         plt.plot(val_loss_list, label="Val Loss")
+    #         plt.xlabel("Epoch")
+    #         plt.ylabel("MSE Loss")
+    #         plt.title("min Val Loss progression for epochs")
+    #         plt.legend()
+    #         plt.grid(True)
+    #         plt.show()
 
     
-    return train_loss_list, val_loss_list, min_epoch_val_min, best_model
+    return train_loss_list, val_loss_list, best_model
 
 
 
@@ -115,7 +115,9 @@ def training_loop_linear_binary(
 # 2- Mon Second Est Nonlinéaire:----------
 #-----------------------------------------
 def training_testing_nonlinear_binary(X, y, X_val, y_val, X_test, y_test, n_epochs = 1000, learning_rate = 1e-2, batch_size = 10, input_dim = 5, output_dim = 1, middle_dim = 5, loss_print = None):
-    
+
+    print(f"Hyper parametrs of the model: - number of epochs: {n_epochs}, learning rate: {learning_rate:.2e}, batch size: {batch_size}:")
+ 
     # define the structure of the NN:
     lin1 = Linear(input_dim, middle_dim)
     act1 = TanH()
@@ -125,7 +127,8 @@ def training_testing_nonlinear_binary(X, y, X_val, y_val, X_test, y_test, n_epoc
     loss_fn = BCELoss()
 
     # print the structure information
-    print(model)
+    if loss_print:
+        print(model)
 
     # define the wrapper and training loop:
     N = X.shape[0]
@@ -178,7 +181,7 @@ def training_testing_nonlinear_binary(X, y, X_val, y_val, X_test, y_test, n_epoc
         test_loss_list.append(test_loss)
         if loss_print == True: 
             if epoch % 100 == 0 or epoch == n_epochs - 1:
-                print(f"Epoch {epoch} - Losses: | Train: {avg_train_loss:.4f} | Val: {val_loss:.4f} | Test: {test_loss:.4f}")
+                print(f"Epoch {epoch} - Losses: | Train: {avg_train_loss:.4f} | Val: {val_loss:.4f} ")
 
 
     # Get the test score of the model:
@@ -204,13 +207,16 @@ def training_testing_nonlinear_binary(X, y, X_val, y_val, X_test, y_test, n_epoc
 # 3- Mon Troisième Est un Encapsulage:----
 #-----------------------------------------
 def training_testing_sequential_binary(X, y, X_test, y_test, X_val, y_val, n_epochs = 1000, learning_rate = 1e-2, batch_size = 10, input_dim = 3, output_dim = 1, middle_dim = 7,loss_print=False):
-    
+
+    print(f"Hyper parametrs of the model: - number of epochs: {n_epochs}, learning rate: {learning_rate:.2e}, batch size: {batch_size}:")
+
     # define the structure of the NN:
     model = Sequential(Linear(input_dim, middle_dim), TanH(), Linear(middle_dim, output_dim), Sigmoide())
     loss_fn = BCELoss()
     
     # print the structure information
-    print(model)
+    if loss_print:
+        print(model)
     
     # define the training loop:
     N = X.shape[0]
@@ -283,7 +289,8 @@ def training_testing_sequential_multiclass(X, y, X_test, y_test, X_val, y_val, n
     loss_fn = CrossEntropyLoss()
     
     # print the structure information
-    print(model)
+    if loss_print:
+        print(model)
     
     # define the wrapper and training loop:
     optimizer = Optim(model, loss_fn, learning_rate)
