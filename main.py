@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import sys
 import argparse
 from enum import Enum
+import pdb
 
 
 # Review: 
@@ -84,7 +85,7 @@ def main():
         print('\nRunning : part 1' + '-' * 80)
 
         create_data_kwargs = {
-            'N': 300, 'input_dim': INPUT_DIM_PART_1, 'n_classes': 1, 'train_size': 0.6, 'val_size': 0.2, 'test_size': 0.2}
+            'N': 300, 'input_dim': INPUT_DIM_PART_1,'n_classes': OUTPUT_DIM_PART_1, 'train_size': 0.6, 'val_size': 0.2, 'test_size': 0.2}
         X_train, X_val, X_test, y_train, y_val, y_test = data_creation(**create_data_kwargs)
 
         training_kwargs = {
@@ -94,7 +95,7 @@ def main():
             'y_val': y_val,
             'X_test': X_test,
             'y_test': y_test,
-            'n_epochs': 1000,
+            'n_epochs': 2000,
             'learning_rate': 2e-02,
             'batch_size': 10,
             'input_dim': INPUT_DIM_PART_1,
@@ -141,8 +142,12 @@ def main():
                 y_train=y_train,
                 y_val=y_val,
                 y_test=y_test,
-                verbose = False)            
+                verbose = False) 
+                      
             print(f"\n\ntraining the model with the obtained hyper param:\n\n")
+            print(f"Best epoch to stop before overfit: {best_nb_epochs}")
+            print(f"Best learning rate: {best_lr}")
+
             training_kwargs = {
                 'X': X_train,
                 'y': y_train,
@@ -173,7 +178,7 @@ def main():
             'y_val': y_val,
             'X_test': X_test,
             'y_test': y_test,
-            'n_epochs': 1000,
+            'n_epochs': 2000,
             'learning_rate': 10e-2,
             'batch_size': 10,
             'input_dim': INPUT_DIM_PART_2,
@@ -222,8 +227,12 @@ def main():
                 y_train=y_train,
                 y_val=y_val,
                 y_test=y_test, 
-                verbose = False)            
+                verbose = False)  
+                      
             print(f"\n\ntraining the model with the obtained hyper param:\n\n")
+            print(f"Best epoch to stop before overfit: {best_nb_epochs}")
+            print(f"Best learning rate: {best_lr}")
+            
             training_kwargs = {
                 'X': X_train,
                 'y': y_train,
@@ -254,7 +263,7 @@ def main():
             'y_test': y_test,
             'X_val': X_val,
             'y_val': y_val,
-            'n_epochs': 4000,
+            'n_epochs': 5000,
             'learning_rate': 1e-0,
             'batch_size': 10,
             'input_dim': INPUT_DIM_PART_3,
@@ -302,7 +311,11 @@ def main():
                 y_val=y_val,
                 y_test=y_test, 
                 verbose = False)            
+                      
             print(f"\n\ntraining the model with the obtained hyper param:\n\n")
+            print(f"Best epoch to stop before overfit: {best_nb_epochs}")
+            print(f"Best learning rate: {best_lr}")
+            
             training_kwargs = {
                 'X': X_train,
                 'y': y_train,
@@ -400,7 +413,7 @@ def main():
 
             
         if search_param == "both":
-            best_lr, best_middle_dim = param_search_p4(
+            best_lr, best_middle_dim, best_n_epochs = param_search_p4(
                 param="both",
                 X_train=X_train,
                 X_val=X_val,
@@ -409,7 +422,11 @@ def main():
                 y_val=y_val,
                 y_test=y_test,
                 verbose = True)
+                      
             print(f"\n\ntraining the model with the obtained hyper param:\n\n")
+            print(f"Best epoch to stop before overfit: {best_n_epochs}")
+            print(f"Best learning rate: {best_lr}")
+            
             training_kwargs = {
                 'X': X_train,
                 'y': y_train,
@@ -417,7 +434,7 @@ def main():
                 'y_val': y_val,
                 'X_test': X_test,
                 'y_test': y_test,
-                'n_epochs': 4000,
+                'n_epochs': best_n_epochs,
                 'learning_rate': best_lr,
                 'batch_size': 30,
                 'input_dim': INPUT_DIM_PART_4,

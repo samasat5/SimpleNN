@@ -170,7 +170,7 @@ class Sequential(Module):
             y = np.argmax(y, axis=1)
         
         acc = np.mean(y_pred == y)
-        print(f"\n\n{label} Accuracy: {acc * 100:.2f}%\n\n")
+        print(f"{label} Accuracy: {acc * 100:.2f}%")
         return acc
 
 

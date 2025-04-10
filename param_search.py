@@ -31,7 +31,7 @@ def param_search_p1(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
         
         learning_rates = np.linspace(0.00001, 0.05, 5)
         if verbose:
-            print (f"learning rates to check: np.linspace(0.0001, 0.05, 20) ")
+            print (f"learning rates to check: np.linspace(0.0001, 0.05, 5) ")
         final_val_losses = []
 
         average_losses = []
@@ -58,7 +58,7 @@ def param_search_p1(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
             final_val_losses.append(val_loss_list[-1]) 
             average_losses.append(np.mean(val_loss_list[-10:]))  # average the val losses for each lr ( to compare the performance of lr)
             if verbose: 
-                plt.plot(val_loss_list, label=f' learning_rate:{learning_rate:3e}')
+                plt.plot(val_loss_list, label=f' learning_rate:{learning_rate:1e}')
         if verbose:    
             plt.xlabel("LR")
             plt.ylabel("Validation Loss")
@@ -92,9 +92,7 @@ def param_search_p1(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
 
         _, val_loss_list, _ = training_loop_linear_binary(**training_kwargs)
         best_n_epochs = np.argmin(val_loss_list)
-        if verbose: 
-            print(f"Best timestep to stop (the best n_epoch) is {best_n_epochs}")
-        
+        print(best_n_epochs)
         
     return best_n_epochs, best_lr
 
@@ -141,7 +139,7 @@ def param_search_p2(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
                 'y_val': y_val,
                 'X_test': X_test,
                 'y_test': y_test,
-                'n_epochs': 1000,
+                'n_epochs': 2000,
                 'learning_rate': learning_rate,
                 'batch_size': 10,
                 'input_dim': 5,
@@ -178,7 +176,7 @@ def param_search_p2(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
                 'y_val': y_val,
                 'X_test': X_test,
                 'y_test': y_test,
-                'n_epochs': 1000,
+                'n_epochs': 2000,
                 'learning_rate': best_by_avg,
                 'batch_size': 10,
                 'input_dim': 5,
@@ -314,7 +312,7 @@ def param_search_p4(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
             'N': 300, 'input_dim': 5, 'n_classes': 1, 
             'train_size': 0.6, 'val_size': 0.2, 'test_size': 0.2
         }
-        learning_rates = np.linspace(0.0001, 0.2, 20)
+        learning_rates = np.linspace(0.0001, 0.2, 5)
         print (f"learning rates to check: np.linspace(0.0001, 0.05, 5) ")
         final_val_losses = []
         average_losses = []
@@ -390,7 +388,7 @@ def param_search_p4(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
             'train_size': 0.6, 'val_size': 0.2, 'test_size': 0.2
         }
         dims = [1, 3, 7, 12, 20]
-        print (f"middle dims to check: np.linspace(1, 15, 5) ")
+        print (f"middle dims to check: 1, 3, 7, 12, 20 ")
         final_val_losses = []
         average_losses = []
 
@@ -488,8 +486,8 @@ def param_search_p4(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
 
                 _, val_loss_list = training_testing_sequential_multiclass(**training_kwargs)
                 avg_val_loss = np.mean(val_loss_list[-10:])  # or use val_loss_list[-1]
-
                 results[(dim, lr)] = avg_val_loss
+                
         best_config = min(results, key=results.get)
         best_middle_dim, best_lr= best_config
         if verbose:
@@ -504,7 +502,32 @@ def param_search_p4(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
             plt.xlabel("Learning Rate")
             plt.ylabel("Middle Dim")
             plt.show()
-        return best_lr, best_middle_dim
+        
+                # Choosing the min average :
+        training_kwargs = {
+                'X': X_train,
+                'y': y_train,
+                'X_val': X_val,
+                'y_val': y_val,
+                'X_test': X_test,
+                'y_test': y_test,
+                'n_epochs': 4000,
+                'learning_rate': best_lr,
+                'batch_size': 10,
+                'input_dim': 5,
+                'output_dim': 3,
+                'middle_dim': best_middle_dim,
+                'loss_print': False
+            }
+
+        _, val_loss_list = training_testing_sequential_multiclass(**training_kwargs)
+        best_n_epochs = np.argmin(val_loss_list)
+        
+        if verbose :
+            print(f"best_n_epochs{min(val_loss_list)}")
+            print(f"Best timestep to stop (the best n_epoch) is {best_n_epochs}")
+        
+        return best_lr, best_middle_dim, best_n_epochs
         
 
 
