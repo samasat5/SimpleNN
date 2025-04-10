@@ -25,6 +25,8 @@ This project has four files:
 - `losses.py` – Contains loss function implementations  (e.g., MSE, BCE, Cross-Entropy)
 - `training.py` – Implements training loops for all parts   (binary & multiclass, linear & nonlinear)
 - `main.py` – Main file for running and testing models
+- `param_search.py` – Searches the suitable hyper parameters for each of the parts
+- `data_utils.py` – Creates the random data
 
 
 
