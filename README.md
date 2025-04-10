@@ -24,7 +24,9 @@ This project has four files:
 - `layers.py` – Defines the linear and nonlinear neural network layers (e.g., Linear, TanH, Sigmoide, Softmax, and Sequential)
 - `losses.py` – Contains loss function implementations  (e.g., MSE, BCE, Cross-Entropy)
 - `training.py` – Implements training loops for all parts   (binary & multiclass, linear & nonlinear)
-- `test_proj.py` – Main file for running and testing models
+- `main.py` – Main file for running and testing models
+- `param_search.py` – Searches the suitable hyper parameters for each of the parts
+- `data_utils.py` – Creates the random data
 
 
 
@@ -34,16 +36,22 @@ This project has four files:
 
 ###  Arguments
 
-| Flag       | Description                                     |
-|------------|-------------------------------------------------|
-| `-p`, `--part` | Select the training part to run. From: `1`, `2`, `3`, `4`, or `all` |
+| Flag           | Description                                                                                  |
+|----------------|----------------------------------------------------------------------------------------------|
+| `-p`, `--part` | **Required.** Select the part of the project to execute. Options: `1`, `2`, `3`, `4`, `all`. |
+| `--search`     | **Optional.** Perform hyperparameter search. Options: `learning_rate` for the part 1,2,3, and `learning_rate`, `middle_dim`, `both` for part 4. If omitted, the model runs with default or pre-selected parameters. |
+
+
+python main.py -p <part_number> [--search <param_name>]
 
 ###  Example Commands
 
 ```bash
-# Run part 1 (linear binary classification)
-python test_proj.py -p 1
+# Run part 1 with the optimized hyper params (linear binary classification)
+python main.py -p 1
 
+# Run the hyper parameter search on the part 1
+python main.py -p 1 --search "learning_rate"
 
 # Run all parts
-python test_proj.py -p all
+python main.py -p all
