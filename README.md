@@ -34,9 +34,11 @@ This project has four files:
 
 ###  Arguments
 
-| Flag       | Description                                     |
-|------------|-------------------------------------------------|
-| `-p`, `--part` | Select the training part to run. From: `1`, `2`, `3`, `4`, or `all` |
+| Flag           | Description                                                                                  |
+|----------------|----------------------------------------------------------------------------------------------|
+| `-p`, `--part` | **Required.** Select the part of the project to execute. Options: `1`, `2`, `3`, `4`, `all`. |
+| `--search`     | **Optional.** Perform hyperparameter search. Options: `learning_rate` for the part 1,2,3, and `learning_rate`, `middle_dim`, `both` for part 4. If omitted, the model runs with default or pre-selected parameters. |
+
 
 python main.py -p <part_number> [--search <param_name>]
 
