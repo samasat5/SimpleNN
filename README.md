@@ -65,6 +65,6 @@ python main.py -p all
 
 ---
 
-ML Course 
+M1 - S2 - ML Course 
 
 Feb 2025
