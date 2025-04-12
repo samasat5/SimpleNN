@@ -54,6 +54,7 @@ python main.py -p 1 --search "learning_rate"
 # Run all parts
 python main.py -p all
 
+```
 
 
 
@@ -62,7 +63,7 @@ python main.py -p all
 
 
 
-###
+---
 _____________________________________________________________________________________________________________________________
 
 ML Course 
