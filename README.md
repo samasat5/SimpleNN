@@ -19,7 +19,7 @@ This script supports 4 different training modes:
 
 Each part generates random data, trains the model, evaluates it, and plots the training/validation/test loss.
 
-This project has four files: 
+This project has six files: 
 - `layers.py` – Defines the linear and nonlinear neural network layers (e.g., Linear, TanH, Sigmoide, Softmax, and Sequential)
 - `losses.py` – Contains loss function implementations  (e.g., MSE, BCE, Cross-Entropy)
 - `training.py` – Implements training loops for all parts   (binary & multiclass, linear & nonlinear)
