@@ -1,7 +1,5 @@
 # Intro to Neural Network: A Simple Implementation 
-ML Course 
 
-Feb 2025
 
 This project is a deep learning framework implemented from scratch in Python . It follows a modular design, where each neural network layer is treated as a reusable Module class, supporting manual forward and backward propagation — similar to early PyTorch-style frameworks, but built entirely from the ground up.
 
@@ -55,3 +53,18 @@ python main.py -p 1 --search "learning_rate"
 
 # Run all parts
 python main.py -p all
+
+
+
+
+
+
+
+
+
+
+_____________________________________________________________________________________________________________________________
+
+ML Course 
+
+Feb 2025
