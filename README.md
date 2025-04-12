@@ -9,12 +9,13 @@ This project is a deep learning framework implemented from scratch in Python . I
 
 This script supports 4 different training modes:
 
-| Part | Description                          | Model Type         | Classification |
-|------|--------------------------------------|--------------------|----------------|
-| 1    | Linear model                         | Linear             | Binary         |
-| 2    | Shallow neural network               | Nonlinear  | Binary |
-| 3    | Deep neural network       | MLP    | Binary |
-| 4    | Deep neural network       | MLP    | Multiclass |
+| Part | Description              | Model Type         | Classification     | `n_classes` | Output Neurons | Activation | Loss Function          |
+|------|--------------------------|--------------------|---------------------|-------------|----------------|------------|------------------------|
+| 1    | Linear model             | Linear             | Binary              | 1           | 1              | Sigmoid    | BCE (Binary Cross-Entropy)   |
+| 2    | Shallow neural network   | Nonlinear (1 hidden layer) | Binary      | 1           | 1              | Sigmoid    | BCE   |
+| 3    | Deep neural network      | MLP (Multi-layer)  | Binary              | 1           | 1              | Sigmoid    | BCE   |
+| 4    | Deep neural network      | MLP (Multi-layer)  | Multiclass (3 classes) | 3       | 3              | Softmax    | Cross-Entropy          |
+
 
 Each part generates random data, trains the model, evaluates it, and plots the training/validation/test loss.
 
