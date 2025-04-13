@@ -5,27 +5,15 @@ from data_utils import data_creation, init_random_seed
 import numpy as np
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
-import sys
-import argparse
-from enum import Enum
-import pdb
-import optuna
 import seaborn as sns
 import pandas as pd
 
 
 def param_search_p1(param, X_train, X_val, X_test, y_train, y_val, y_test, verbose = True):
-    # Default values (in case some are not searched)
     best_n_epochs = 200
     best_lr = 2e-00
-    best_batch_size = 10
-    if param == "learning_rate": 
-        # print("\n\nHyperParam Learning_rate: Controls how much the model updates per step.Too high = unstable; too low = slow training.")
-        create_data_kwargs = {
-            'N': 300, 'input_dim': 5, 'n_classes': 1, 
-            'train_size': 0.6, 'val_size': 0.2, 'test_size': 0.2
-        }
 
+    if param == "learning_rate": 
         learning_rates = np.linspace(0.00001, 0.05, 10)
         if verbose:
             print (f"learning rates to check: np.linspace(0.0001, 0.05, 5) ")
@@ -95,19 +83,12 @@ def param_search_p1(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
 
 
 def param_search_p2(param, X_train, X_val, X_test, y_train, y_val, y_test, verbose = True):
-    # Default values (in case some are not searched)
     best_n_epochs = 1000
     best_lr = 2e-00
-    best_batch_size = 10
+
     if param == "learning_rate": 
         if verbose:
             print("\n\nHyperParam Learning_rate: Controls how much the model updates per step.Too high = unstable; too low = slow training.")
-        create_data_kwargs = {
-            'N': 300, 'input_dim': 5, 'n_classes': 1, 
-            'train_size': 0.6, 'val_size': 0.2, 'test_size': 0.2
-        }
-
-        
         learning_rates = np.linspace(0.0001, 0.2, 5)
         if verbose:
             print (f"learning rates to check: np.linspace(0.0001, 0.05, 5) ")
@@ -177,10 +158,9 @@ def param_search_p2(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
         if verbose:
             print(f"Best timestep to stop (the best n_epoch) is {best_n_epochs}")
         best_lr = best_by_avg
-        
         return best_n_epochs, best_lr
     
-    elif param == "both":
+    elif param == "LR_and_middleDim":
         middle_dims = [1, 3, 7, 12, 20]
         learning_rates = [0.001, 0.005, 0.01, 0.050075, 0.06]
         results = {}
@@ -224,7 +204,6 @@ def param_search_p2(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
             plt.ylabel("Middle Dim")
             plt.show()
         
-                # Choosing the min average :
         training_kwargs = {
                 'X': X_train,
                 'y': y_train,
@@ -263,24 +242,18 @@ def param_search_p2(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
 
 
 def param_search_p3(param, X_train, X_val, X_test, y_train, y_val, y_test, verbose=True):
-    # Default values (in case some are not searched)
     best_n_epochs = 1000
     best_lr = 2e-00
-    best_batch_size = 10
     if param == "learning_rate": 
         if verbose:
             print("\n\nHyperParam Learning_rate: Controls how much the model updates per step.Too high = unstable; too low = slow training.")
-        create_data_kwargs = {
-            'N': 300, 'input_dim': 5, 'n_classes': 1, 
-            'train_size': 0.6, 'val_size': 0.2, 'test_size': 0.2
-        }
 
         learning_rates = np.linspace(0.00001, 0.05, 5)
         if verbose:
             print (f"learning rates to check: np.linspace(0.0001, 0.05, 5) ")
         final_val_losses = []
         average_losses = []
-        min_losses = []
+
         for learning_rate in learning_rates: 
             if verbose:
                 print(f"→ Trying learning rate: {learning_rate:.4e}")
@@ -339,15 +312,13 @@ def param_search_p3(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
             }
 
         _, val_loss_list = training_testing_sequential_binary(**training_kwargs)
-        
         best_n_epochs = np.argmin(val_loss_list)
         if verbose:
             print(f"Best timestep to stop (the best n_epoch) is {best_n_epochs}")
         best_lr = best_by_avg
-        
         return best_n_epochs, best_lr
     
-    elif param == "both":
+    elif param == "LR_and_middleDim":
         middle_dims = [1, 3, 7, 12, 20]
         learning_rates = [0.001, 0.005, 0.01, 0.050075, 0.06]
         results = {}
@@ -427,17 +398,11 @@ def param_search_p3(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
 
 
 def param_search_p4(param, X_train, X_val, X_test, y_train, y_val, y_test, verbose = True):
-    # Default values (in case some are not searched)
     best_n_epochs = 1000
     best_lr = 2e-00
-    best_batch_size = 10
     
     if param == "learning_rate": 
         print("\n\nHyperParam Learning_rate: Controls how much the model updates per step.Too high = unstable; too low = slow training.")
-        create_data_kwargs = {
-            'N': 300, 'input_dim': 5, 'n_classes': 1, 
-            'train_size': 0.6, 'val_size': 0.2, 'test_size': 0.2
-        }
         learning_rates = np.linspace(0.0001, 0.2, 5)
         print (f"learning rates to check: np.linspace(0.0001, 0.05, 5) ")
         final_val_losses = []
@@ -464,9 +429,7 @@ def param_search_p4(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
             
             _, val_loss_list= training_testing_sequential_multiclass(**training_kwargs)
             final_val_losses.append(val_loss_list[-1]) 
-            average_losses.append(np.mean(val_loss_list[-10:]))  # op 1: average the val losses for each lr ( to compare the performance of lr)
-
-  
+            average_losses.append(np.mean(val_loss_list[-10:]))  
             plt.plot(val_loss_list, label=f' learning rate :{learning_rate:.1e}')
 
         plt.xlabel("Middle Layer Dimension")
@@ -478,8 +441,6 @@ def param_search_p4(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
         plt.show()
         # Find best learning rates by different metrics
         best_by_avg = learning_rates[np.argmin(average_losses)]
-
-
         print(f"→ Best LR by average of last 10 epochs: {best_by_avg:.4e}")
 
         
@@ -501,18 +462,13 @@ def param_search_p4(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
             }
 
         _, val_loss_list = training_testing_sequential_multiclass(**training_kwargs)
-        
         best_n_epochs = np.argmin(val_loss_list)
         print(f"Best timestep to stop (the best n_epoch) is {best_n_epochs}")
-        best_lr = best_by_avg
         
+        best_lr = best_by_avg
         return best_n_epochs, best_lr
     
     elif param == "middle_dim": 
-        create_data_kwargs = {
-            'N': 300, 'input_dim': 5, 'n_classes': 1, 
-            'train_size': 0.6, 'val_size': 0.2, 'test_size': 0.2
-        }
         dims = [1, 3, 7, 12, 20]
         print (f"middle dims to check: 1, 3, 7, 12, 20 ")
         final_val_losses = []
@@ -540,8 +496,6 @@ def param_search_p4(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
             _, val_loss_list= training_testing_sequential_multiclass(**training_kwargs)
             final_val_losses.append(val_loss_list[-1]) 
             average_losses.append(np.mean(val_loss_list[-10:]))  # op 1: average the val losses for each lr ( to compare the performance of lr)
-            
-
             plt.plot(val_loss_list, label=f' nb of middle dim:{dim}')
 
         plt.xlabel("Middle Layer Dimension")
@@ -577,15 +531,14 @@ def param_search_p4(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
             }
 
         _, val_loss_list = training_testing_sequential_multiclass(**training_kwargs)
-        
         best_n_epochs = np.argmin(val_loss_list)
-        print(f"best_n_epochs{min(val_loss_list)}")
-        print(f"Best timestep to stop (the best n_epoch) is {best_n_epochs}")
+        if verbose:
+            print(f"Best timestep to stop (the best n_epoch) is {best_n_epochs}")
         best_dim = best_by_avg
         return best_n_epochs, best_dim
     
     
-    elif "both":
+    elif param == "LR_and_middleDim":
         middle_dims = [1, 3, 7, 12, 20]
         learning_rates = [0.0005, 0.001, 0.005, 0.01, 0.05]
         results = {}

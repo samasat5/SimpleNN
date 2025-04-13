@@ -103,8 +103,6 @@ def main():
             'loss_print': True
         }
         if search_param == "learning_rate":
-            # print(f"\n\ntraining the model with random hyper param:\n\n")
-            # training_loop_linear_binary(**training_kwargs)
             best_nb_epochs, best_lr = param_search_p1(
                 param="learning_rate",
                 X_train=X_train,
@@ -130,8 +128,7 @@ def main():
                 'loss_print': True}
             training_loop_linear_binary(**training_kwargs)
             
-        
-        if search_param == None:
+        elif search_param == None:
             training_kwargs = {
                 'X': X_train,
                 'y': y_train,
@@ -146,7 +143,6 @@ def main():
                 'output_dim': OUTPUT_DIM_PART_1,
                 'loss_print': True}
             training_loop_linear_binary(**training_kwargs)
-
 
 
     if exec_part_2_flg:
@@ -171,40 +167,10 @@ def main():
             'loss_print': True
         }
         
-        
-        if search_param == "learning_rate":
-            # print(f"\n\ntraining the model with random hyper param:\n\n")
-            # training_testing_nonlinear_binary(**training_kwargs)
-            best_nb_epochs, best_lr = param_search_p2(
-                param="learning_rate",
-                X_train=X_train,
-                X_val=X_val,
-                X_test=X_test,
-                y_train=y_train,
-                y_val=y_val,
-                y_test=y_test, 
-                verbose = True)            
-            print(f"\n\ntraining the model with the obtained hyper param:\n\n")
-            training_kwargs = {
-                'X': X_train,
-                'y': y_train,
-                'X_val': X_val,
-                'y_val': y_val,
-                'X_test': X_test,
-                'y_test': y_test,
-                'n_epochs': best_nb_epochs,
-                'learning_rate': best_lr,
-                'batch_size': 10,
-                'input_dim': INPUT_DIM_PART_2,
-                'output_dim': OUTPUT_DIM_PART_2,
-                'middle_dim' : 20,
-                'loss_print': False}
-            training_testing_nonlinear_binary(**training_kwargs)
-            
-        
-        if search_param == "both":
+
+        if search_param == "LR_and_middleDim":
             best_lr, best_middle_dim, best_n_epo = param_search_p2(
-            param="both",
+            param="LR_and_middleDim",
             X_train=X_train,
             X_val=X_val,
             X_test=X_test,
@@ -234,7 +200,7 @@ def main():
             training_testing_nonlinear_binary(**training_kwargs)
             
 
-        if search_param == None:
+        elif search_param == None:
             training_kwargs = {
                 'X': X_train,
                 'y': y_train,
@@ -273,38 +239,11 @@ def main():
             'middle_dim': 3,
             'loss_print': True
         }
-        if search_param == "learning_rate":
-            # print(f"\n\ntraining the model with random hyper param:\n\n")
-            # training_testing_sequential_binary(**training_kwargs)
-            best_nb_epochs, best_lr = param_search_p3(
-                param="learning_rate",
-                X_train=X_train,
-                X_val=X_val,
-                X_test=X_test,
-                y_train=y_train,
-                y_val=y_val,
-                y_test=y_test,
-                verbose=True)            
-            print(f"\n\ntraining the model with the obtained hyper param:\n\n")
-            training_kwargs = {
-                'X': X_train,
-                'y': y_train,
-                'X_val': X_val,
-                'y_val': y_val,
-                'X_test': X_test,
-                'y_test': y_test,
-                'n_epochs': best_nb_epochs,
-                'learning_rate': best_lr,
-                'batch_size': 10,
-                'input_dim': INPUT_DIM_PART_3,
-                'output_dim': OUTPUT_DIM_PART_3,
-                'loss_print': True}
-            training_testing_sequential_binary(**training_kwargs)
             
             
-        if search_param == "both":
+        if search_param == "LR_and_middleDim":
             best_lr, best_middle_dim, best_n_epo = param_search_p3(
-            param="both",
+            param="LR_and_middleDim",
             X_train=X_train,
             X_val=X_val,
             X_test=X_test,
@@ -333,7 +272,7 @@ def main():
                 'loss_print': True}
             training_testing_sequential_binary(**training_kwargs)
             
-        if search_param == None:
+        elif search_param == None:
             training_kwargs = {
                 'X': X_train,
                 'y': y_train,
@@ -370,70 +309,11 @@ def main():
             'middle_dim': 7,
             'loss_print': True
         }
-        
-        if search_param == "learning_rate":
-            # print(f"\n\ntraining the model with random hyper param:\n\n")
-            # training_testing_sequential_multiclass(**training_kwargs)
-            best_nb_epochs, best_lr = param_search_p4(
-                param="learning_rate",
-                X_train=X_train,
-                X_val=X_val,
-                X_test=X_test,
-                y_train=y_train,
-                y_val=y_val,
-                y_test=y_test, 
-                verbose = True)            
-            print(f"\n\ntraining the model with the obtained hyper param:\n\n")
-            training_kwargs = {
-                'X': X_train,
-                'y': y_train,
-                'X_val': X_val,
-                'y_val': y_val,
-                'X_test': X_test,
-                'y_test': y_test,
-                'n_epochs': best_nb_epochs,
-                'learning_rate': best_lr,
-                'batch_size': 30,
-                'input_dim': INPUT_DIM_PART_4,
-                'output_dim': OUTPUT_DIM_PART_4,
-                'loss_print': True}
-            training_testing_sequential_multiclass(**training_kwargs)
+       
             
-            
-        if search_param == "middle_dim":
-            # print(f"\n\ntraining the model with random hyper param:\n\n")
-            # training_testing_sequential_multiclass(**training_kwargs)
-            best_nb_epochs, best_dim = param_search_p4(
-                param="middle_dim",
-                X_train=X_train,
-                X_val=X_val,
-                X_test=X_test,
-                y_train=y_train,
-                y_val=y_val,
-                y_test=y_test, 
-                verbose = True)            
-            print(f"\n\ntraining the model with the obtained hyper param:\n\n")
-            training_kwargs = {
-                'X': X_train,
-                'y': y_train,
-                'X_val': X_val,
-                'y_val': y_val,
-                'X_test': X_test,
-                'y_test': y_test,
-                'n_epochs': best_nb_epochs,
-                'learning_rate': 0.2,
-                'batch_size': 30,
-                'input_dim': INPUT_DIM_PART_4,
-                'output_dim': OUTPUT_DIM_PART_4,
-                'middle_dim': best_dim,
-                'loss_print': True}
-            training_testing_sequential_multiclass(**training_kwargs)
-
-
-            
-        if search_param == "both":
+        if search_param == "LR_and_middleDim":
             best_lr, best_middle_dim, best_n_epochs = param_search_p4(
-                param="both",
+                param="LR_and_middleDim",
                 X_train=X_train,
                 X_val=X_val,
                 X_test=X_test,
@@ -462,7 +342,7 @@ def main():
                 'loss_print': True}
             training_testing_sequential_multiclass(**training_kwargs) 
 
-        if search_param == None:
+        elif search_param == None:
             training_kwargs = {
                 'X': X_train,
                 'y': y_train,
@@ -479,7 +359,7 @@ def main():
                 'loss_print': True}
             training_testing_sequential_multiclass(**training_kwargs) 
             
-            
+
             
     # else:
     #     raise RuntimeError()
