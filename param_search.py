@@ -314,8 +314,6 @@ def param_search_p3(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
             plt.grid(True)
             plt.tight_layout()
             plt.show()
-
-  
             
         # Find best learning rates by different metrics
         best_by_avg = learning_rates[np.argmin(average_losses)]
