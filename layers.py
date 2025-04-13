@@ -16,7 +16,7 @@ class Linear(object):
     def __init__(self, input_dim, output_dim):
         init_random_seed()
         self._parameters = {
-            'W': np.random.randn(input_dim, output_dim) * 0.01,
+            'W': np.random.randn(input_dim, output_dim) * np.sqrt(2 / input_dim),
             'b': np.zeros((1, output_dim))}
         self._gradient = {
             'W': np.zeros_like(self._parameters['W']),
@@ -157,9 +157,6 @@ class Sequential(Module):
     
     def score(self, X, y, Activation_func=None, label="Test"):
         y_pred = self.forward(X)
-        
-        if Activation_func:
-            y_pred = Activation_func(y_pred)
         
         if y_pred.shape[1] == 1:
             y_pred = (y_pred > 0.5).astype(int).flatten()

@@ -1,8 +1,14 @@
 import numpy as np
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+import numpy as np
+
+
 #-----------------------------------------
 # Data Creation:--------------------------
 #-----------------------------------------
+
 SEED_NUMBER = 0
 
 def data_creation(N=300, input_dim=5, n_classes=1, train_size=0.6, val_size=0.2, test_size=0.2):
@@ -38,3 +44,31 @@ def data_creation(N=300, input_dim=5, n_classes=1, train_size=0.6, val_size=0.2,
 
 def init_random_seed():
     np.random.seed(SEED_NUMBER)
+
+
+def visualize_data(X, y, title="Data Visualization"):
+
+    if y.ndim > 1 and y.shape[1] > 1:
+        y_labels = np.argmax(y, axis=1)
+    else:
+        y_labels = y.flatten().astype(int)
+
+    X_2d = PCA(n_components=2).fit_transform(X)
+
+    plt.figure(figsize=(8, 6))
+    scatter = plt.scatter(X_2d[:, 0], X_2d[:, 1], c=y_labels, cmap='Dark2', edgecolor='k', alpha=0.9)
+    plt.title(title)
+    plt.xlabel("PCA Component 1")
+    plt.ylabel("PCA Component 2")
+    plt.grid(True)
+
+    n_classes = len(np.unique(y_labels))
+    plt.colorbar(scatter, ticks=range(n_classes), label="Class")
+    plt.tight_layout()
+    plt.show()
+
+
+# create_data_kwargs = {
+#     'N': 3000, 'input_dim': 5,'n_classes': 3, 'train_size': 0.6, 'val_size': 0.2, 'test_size': 0.2}
+# X_train, X_val, X_test, y_train, y_val, y_test = data_creation(**create_data_kwargs)
+# visualize_data(X_train, y_train, title="Training Data: PCA Visualization (3 Classes)")

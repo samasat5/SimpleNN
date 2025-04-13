@@ -3,6 +3,7 @@ from layers import Linear, TanH, Sigmoide, Sequential, Optim, Softmax
 import numpy as np
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
+from data_utils import visualize_data
 import pdb
 import copy
 
@@ -116,7 +117,7 @@ def training_loop_linear_binary(
 #-----------------------------------------
 def training_testing_nonlinear_binary(X, y, X_val, y_val, X_test, y_test, n_epochs = 1000, learning_rate = 1e-2, batch_size = 10, input_dim = 5, output_dim = 1, middle_dim = 5, loss_print = None):
 
-    print(f"Hyper parametrs of the model: - number of epochs: {n_epochs}, learning rate: {learning_rate:.2e}, batch size: {batch_size}:")
+    print(f"Hyper parametrs of the model: - number of epochs: {n_epochs}, learning rate: {learning_rate:.2e}, nb of mid dim: {output_dim}, batch size: {batch_size}:")
  
     # define the structure of the NN:
     lin1 = Linear(input_dim, middle_dim)
@@ -166,7 +167,6 @@ def training_testing_nonlinear_binary(X, y, X_val, y_val, X_test, y_test, n_epoc
             # update
             lin1.update_parameters(learning_rate)
             lin2.update_parameters(learning_rate)
-            
 
         avg_train_loss = total_train_loss / (N / batch_size)
         train_loss_list.append(avg_train_loss)
@@ -179,15 +179,22 @@ def training_testing_nonlinear_binary(X, y, X_val, y_val, X_test, y_test, n_epoc
         test_pred = model.forward(X_test)
         test_loss = np.mean(loss_fn.forward(y_test, test_pred))
         test_loss_list.append(test_loss)
+        
         if loss_print == True: 
             if epoch % 100 == 0 or epoch == n_epochs - 1:
                 print(f"Epoch {epoch} - Losses: | Train: {avg_train_loss:.4f} | Val: {val_loss:.4f} ")
 
+    # # Visualize how the hidden layer is working:
+    # z1_all = lin1.forward(X)
+    # a1_all = act1.forward(z1_all)
+    # visualize_data(a1_all, y, title="Hidden Layer Activations on Full Training Data (PCA)")
 
     # Get the test score of the model:
-    model.score(X_test, y_test, Activation_func=act2.forward, label="Test")
+    model.score(X_test, y_test, Activation_func=None, label="Test")
     # Get the train score of the model:
-    model.score(X, y, Activation_func=act2.forward, label="Train")
+    model.score(X, y, Activation_func=None, label="Train")
+
+
     
     if loss_print == True:
         plt.plot(train_loss_list, label="Training Loss")
@@ -272,12 +279,13 @@ def training_testing_sequential_binary(X, y, X_test, y_test, X_val, y_val, n_epo
         plt.show()
     
     # Get the test score of the model:
-    model.score(X_test, y_test, Activation_func=Sigmoide().forward, label="Test")
+    model.score(X_test, y_test, Activation_func=None, label="Test")
     # Get the train score of the model:
-    model.score(X, y, Activation_func=Sigmoide().forward, label="Train")
+    model.score(X, y, Activation_func=None, label="Train")
     
 
     return train_loss_list, val_loss_list
+
 #-----------------------------------------
 # 4- Mon Quatrième Est Multi-classe:------
 #-----------------------------------------

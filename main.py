@@ -132,22 +132,6 @@ def main():
             
         
         if search_param == None:
-            # print(f"\n\ntraining the model with random hyper param:\n\n")
-            # training_loop_linear_binary(**training_kwargs)
-            best_nb_epochs, best_lr = param_search_p1(
-                param="learning_rate",
-                X_train=X_train,
-                X_val=X_val,
-                X_test=X_test,
-                y_train=y_train,
-                y_val=y_val,
-                y_test=y_test,
-                verbose = False) 
-                      
-            print(f"\n\ntraining the model with the obtained hyper param:\n\n")
-            print(f"Best epoch to stop before overfit: {best_nb_epochs}")
-            print(f"Best learning rate: {best_lr}")
-
             training_kwargs = {
                 'X': X_train,
                 'y': y_train,
@@ -155,8 +139,8 @@ def main():
                 'y_val': y_val,
                 'X_test': X_test,
                 'y_test': y_test,
-                'n_epochs': best_nb_epochs,
-                'learning_rate': best_lr,
+                'n_epochs': 648,
+                'learning_rate': 1e-05,
                 'batch_size': 10,
                 'input_dim': INPUT_DIM_PART_1,
                 'output_dim': OUTPUT_DIM_PART_1,
@@ -183,7 +167,7 @@ def main():
             'batch_size': 10,
             'input_dim': INPUT_DIM_PART_2,
             'output_dim': OUTPUT_DIM_PART_2,
-            'middle_dim': 5,
+            'middle_dim': 20,
             'loss_print': True
         }
         
@@ -213,25 +197,25 @@ def main():
                 'batch_size': 10,
                 'input_dim': INPUT_DIM_PART_2,
                 'output_dim': OUTPUT_DIM_PART_2,
+                'middle_dim' : 20,
                 'loss_print': False}
             training_testing_nonlinear_binary(**training_kwargs)
             
-        if search_param == None:
-            # print(f"\n\ntraining the model with random hyper param:\n\n")
-            # training_testing_nonlinear_binary(**training_kwargs)
-            best_nb_epochs, best_lr = param_search_p2(
-                param="learning_rate",
-                X_train=X_train,
-                X_val=X_val,
-                X_test=X_test,
-                y_train=y_train,
-                y_val=y_val,
-                y_test=y_test, 
-                verbose = False)  
-                      
-            print(f"\n\ntraining the model with the obtained hyper param:\n\n")
-            print(f"Best epoch to stop before overfit: {best_nb_epochs}")
+        
+        if search_param == "both":
+            best_lr, best_middle_dim, best_n_epo = param_search_p2(
+            param="both",
+            X_train=X_train,
+            X_val=X_val,
+            X_test=X_test,
+            y_train=y_train,
+            y_val=y_val,
+            y_test=y_test, 
+            verbose = True) 
+            
+            print(f"Best epoch to stop before overfit: {best_n_epo}")
             print(f"Best learning rate: {best_lr}")
+            print(f"Best middle dim num: {best_middle_dim}")
             
             training_kwargs = {
                 'X': X_train,
@@ -240,14 +224,32 @@ def main():
                 'y_val': y_val,
                 'X_test': X_test,
                 'y_test': y_test,
-                'n_epochs': best_nb_epochs,
+                'n_epochs': best_n_epo,
                 'learning_rate': best_lr,
                 'batch_size': 10,
                 'input_dim': INPUT_DIM_PART_2,
                 'output_dim': OUTPUT_DIM_PART_2,
-                'loss_print': False}
+                'middle_dim' : best_middle_dim,
+                'loss_print': True}
             training_testing_nonlinear_binary(**training_kwargs)
+            
 
+        if search_param == None:
+            training_kwargs = {
+                'X': X_train,
+                'y': y_train,
+                'X_val': X_val,
+                'y_val': y_val,
+                'X_test': X_test,
+                'y_test': y_test,
+                'n_epochs': 2450,
+                'learning_rate': 0.06,
+                'batch_size': 10,
+                'input_dim': INPUT_DIM_PART_2,
+                'output_dim': OUTPUT_DIM_PART_2,
+                'middle_dim' : 7,
+                'loss_print': True}
+            training_testing_nonlinear_binary(**training_kwargs)
 
     if exec_part_3_flg:
 
@@ -299,22 +301,21 @@ def main():
                 'loss_print': True}
             training_testing_sequential_binary(**training_kwargs)
             
-        if search_param == None:
-            # print(f"\n\ntraining the model with random hyper param:\n\n")
-            # training_testing_sequential_binary(**training_kwargs)
-            best_nb_epochs, best_lr = param_search_p3(
-                param="learning_rate",
-                X_train=X_train,
-                X_val=X_val,
-                X_test=X_test,
-                y_train=y_train,
-                y_val=y_val,
-                y_test=y_test, 
-                verbose = False)            
-                      
-            print(f"\n\ntraining the model with the obtained hyper param:\n\n")
-            print(f"Best epoch to stop before overfit: {best_nb_epochs}")
+            
+        if search_param == "both":
+            best_lr, best_middle_dim, best_n_epo = param_search_p3(
+            param="both",
+            X_train=X_train,
+            X_val=X_val,
+            X_test=X_test,
+            y_train=y_train,
+            y_val=y_val,
+            y_test=y_test, 
+            verbose = True) 
+            
+            print(f"Best epoch to stop before overfit: {best_n_epo}")
             print(f"Best learning rate: {best_lr}")
+            print(f"Best middle dim num: {best_middle_dim}")
             
             training_kwargs = {
                 'X': X_train,
@@ -323,11 +324,29 @@ def main():
                 'y_val': y_val,
                 'X_test': X_test,
                 'y_test': y_test,
-                'n_epochs': best_nb_epochs,
+                'n_epochs': best_n_epo,
                 'learning_rate': best_lr,
                 'batch_size': 10,
                 'input_dim': INPUT_DIM_PART_3,
                 'output_dim': OUTPUT_DIM_PART_3,
+                'middle_dim' : best_middle_dim,
+                'loss_print': True}
+            training_testing_sequential_binary(**training_kwargs)
+            
+        if search_param == None:
+            training_kwargs = {
+                'X': X_train,
+                'y': y_train,
+                'X_val': X_val,
+                'y_val': y_val,
+                'X_test': X_test,
+                'y_test': y_test,
+                'n_epochs': 2450,
+                'learning_rate': 0.06,
+                'batch_size': 10,
+                'input_dim': INPUT_DIM_PART_3,
+                'output_dim': OUTPUT_DIM_PART_3,
+                'middle_dim' : 7,
                 'loss_print': True}
             training_testing_sequential_binary(**training_kwargs)
 
@@ -470,4 +489,5 @@ def main():
 if __name__ == "__main__":
     init_random_seed()
     sys.exit(main())
+
 
