@@ -37,7 +37,7 @@ This project has six files:
 
 | Flag           | Description                                                                                  |
 |----------------|----------------------------------------------------------------------------------------------|
-| `-p`, `--part` | **Required.** Select the part of the project to execute. Options: `1`, `2`, `3`, `4`, `all`. |
+| `-p`, `--part` | **Required.** Select the part of the project to execute. Options: `1`, `2`, `3`, `4`, `all`. For each part, the models are trained with the best learning_rate,  |
 | `--search`     | **Optional.** Perform hyperparameter search. Options: `learning_rate` for the part 1 and `LR_and_middleDim` for the part 2,3,4.|
 
 
