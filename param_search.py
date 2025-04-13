@@ -161,8 +161,8 @@ def param_search_p2(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
         return best_n_epochs, best_lr
     
     elif param == "LR_and_middleDim":
-        middle_dims = [1, 3, 7, 12, 20]
-        learning_rates = [0.001, 0.005, 0.01, 0.050075, 0.06]
+        middle_dims = [5, 6, 7, 8, 12, 20]
+        learning_rates = [0.01, 0.050075, 0.06, 0.07, 0.09, 0.2]
         results = {}
 
         for dim in middle_dims:
@@ -224,7 +224,6 @@ def param_search_p2(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
         best_n_epo = np.argmin(val_loss_list)
         
         if verbose :
-            print(f"best_n_epochs{min(val_loss_list)}")
             print(f"Best timestep to stop (the best n_epoch) is {best_n_epo}")
         
         return best_lr, best_middle_dim, best_n_epo
@@ -232,6 +231,99 @@ def param_search_p2(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
 
 
 
+
+
+
+def iterative_grid_search_p2(X_train, y_train, X_val, y_val, X_test, y_test, 
+                          initial_middle_dims, initial_lrs, iterations=3,
+                          n_epochs=1000, input_dim=5, output_dim=3, batch_size=10,
+                          refine_factor=0.5, refine_points=5, verbose=True):
+
+    current_middle_dims = initial_middle_dims
+    current_lrs = initial_lrs
+
+    for iteration in range(iterations):
+        if verbose:
+            print(f"\nIteration {iteration + 1}/{iterations}")
+
+        results = {}
+        for dim in current_middle_dims:
+            
+            for lr in current_lrs:
+                if verbose:
+                    print(f"Training with middle_dim={dim}, learning_rate={lr}")
+                
+                training_kwargs = {
+                    'X': X_train,
+                    'y': y_train,
+                    'X_val': X_val,
+                    'y_val': y_val,
+                    'X_test': X_test,
+                    'y_test': y_test,
+                    'n_epochs': n_epochs,
+                    'learning_rate': lr,
+                    'batch_size': batch_size,
+                    'input_dim': input_dim,
+                    'output_dim': output_dim,
+                    'middle_dim': dim,
+                    'loss_print': False
+                }
+
+                _, val_loss_list = training_testing_nonlinear_binary(**training_kwargs)
+                avg_val_loss = np.mean(val_loss_list[-10:])
+                results[(dim, lr)] = avg_val_loss
+
+        best_config = min(results, key=results.get)
+        best_middle_dim, best_lr = best_config
+
+        if verbose:
+            print(f"Best params from iteration {iteration + 1}: middle_dim={best_middle_dim}, learning_rate={best_lr}")
+        df = pd.DataFrame(index=current_middle_dims, columns=current_lrs)
+        for (dim, lr), loss in results.items():
+            df.loc[dim, lr] = loss
+        if verbose:
+            plt.figure(figsize=(8,6))
+            sns.heatmap(df.astype(float), annot=True, fmt=".4f", cmap="viridis")
+            plt.title(f"Validation Loss Heatmap (Iteration {iteration + 1})")
+            plt.xlabel("Learning Rate")
+            plt.ylabel("Middle Dim")
+            plt.show()
+
+        # Refining grids around the best params
+        middle_dim_range = max(1, int(refine_factor * len(current_middle_dims)))
+        lr_range = refine_factor * (max(current_lrs) - min(current_lrs))
+
+        new_middle_min = max(min(initial_middle_dims), best_middle_dim - middle_dim_range)
+        new_middle_max = min(max(initial_middle_dims), best_middle_dim + middle_dim_range)
+        current_middle_dims = list(range(new_middle_min, new_middle_max + 1))
+
+        new_lr_min = max(min(initial_lrs), best_lr - lr_range / 2)
+        new_lr_max = min(max(initial_lrs), best_lr + lr_range / 2)
+        current_lrs = np.linspace(new_lr_min, new_lr_max, refine_points)
+
+    training_kwargs = {
+        'X': X_train,
+        'y': y_train,
+        'X_val': X_val,
+        'y_val': y_val,
+        'X_test': X_test,
+        'y_test': y_test,
+        'n_epochs': 4000,
+        'learning_rate': best_lr,
+        'batch_size': batch_size,
+        'input_dim': input_dim,
+        'output_dim': output_dim,
+        'middle_dim': best_middle_dim,
+        'loss_print': False
+    }
+
+    _, val_loss_list = training_testing_nonlinear_binary(**training_kwargs)
+    best_n_epoch = np.argmin(val_loss_list)
+
+    if verbose:
+        print(f"\nFinal best combination: middle_dim={best_middle_dim}, learning_rate={best_lr}, best_n_epoch={best_n_epoch}")
+
+    return best_lr, best_middle_dim, best_n_epoch
 
 
 
@@ -319,8 +411,8 @@ def param_search_p3(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
         return best_n_epochs, best_lr
     
     elif param == "LR_and_middleDim":
-        middle_dims = [1, 3, 7, 12, 20]
-        learning_rates = [0.001, 0.005, 0.01, 0.050075, 0.06]
+        middle_dims = [3, 7, 8, 12]
+        learning_rates = [0.005, 0.01, 0.05, 0.06, 0.09, 0.1]
         results = {}
 
         for dim in middle_dims:
@@ -362,7 +454,7 @@ def param_search_p3(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
             plt.ylabel("Middle Dim")
             plt.show()
         
-                # Choosing the min average :
+        # Choosing the min average :
         training_kwargs = {
                 'X': X_train,
                 'y': y_train,
@@ -392,9 +484,6 @@ def param_search_p3(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
 ##################################################################################################################################
 
 ##################################################################################################################################
-
-
-
 
 
 def param_search_p4(param, X_train, X_val, X_test, y_train, y_val, y_test, verbose = True):
@@ -539,8 +628,8 @@ def param_search_p4(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
     
     
     elif param == "LR_and_middleDim":
-        middle_dims = [1, 3, 7, 12, 20]
-        learning_rates = [0.0005, 0.001, 0.005, 0.01, 0.05]
+        middle_dims = [3, 7, 11, 12, 13, 20]
+        learning_rates = [ 0.005, 0.05, 0.08, 0.4, 0.6, 0.8]
         results = {}
 
         for dim in middle_dims:
@@ -564,7 +653,7 @@ def param_search_p4(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
                 }
 
                 _, val_loss_list = training_testing_sequential_multiclass(**training_kwargs)
-                avg_val_loss = np.mean(val_loss_list[-10:])  # or use val_loss_list[-1]
+                avg_val_loss = np.mean(val_loss_list[-10:]) 
                 results[(dim, lr)] = avg_val_loss
                 
         best_config = min(results, key=results.get)
@@ -582,7 +671,7 @@ def param_search_p4(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
             plt.ylabel("Middle Dim")
             plt.show()
         
-                # Choosing the min average :
+        # Choosing the min average :
         training_kwargs = {
                 'X': X_train,
                 'y': y_train,
@@ -601,11 +690,10 @@ def param_search_p4(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
 
         _, val_loss_list = training_testing_sequential_multiclass(**training_kwargs)
         best_n_epochs = np.argmin(val_loss_list)
-        
+
         if verbose :
-            print(f"best_n_epochs{min(val_loss_list)}")
             print(f"Best timestep to stop (the best n_epoch) is {best_n_epochs}")
-        
+            
         return best_lr, best_middle_dim, best_n_epochs
         
 

@@ -2,7 +2,7 @@
 from training import training_loop_linear_binary, training_testing_nonlinear_binary, training_testing_sequential_binary, training_testing_sequential_multiclass
 from losses import BCELoss, MSELoss, CrossEntropyLoss
 from layers import Linear, TanH, Sigmoide, Sequential, Optim
-from param_search import param_search_p1, param_search_p2, param_search_p3, param_search_p4
+from param_search import param_search_p1, param_search_p2, param_search_p3, param_search_p4, iterative_grid_search_p2
 from data_utils import data_creation, init_random_seed
 import numpy as np
 import matplotlib.pyplot as plt
@@ -49,9 +49,6 @@ OUTPUT_DIM_PART_3 = 1
 INPUT_DIM_PART_4 = 5
 OUTPUT_DIM_PART_4 = 3
 
-
-
-# TODO : why is the code taking so much time before starting ? 
 
 
 
@@ -208,8 +205,8 @@ def main():
                 'y_val': y_val,
                 'X_test': X_test,
                 'y_test': y_test,
-                'n_epochs': 2450,
-                'learning_rate': 0.06,
+                'n_epochs': 1062,
+                'learning_rate': 0.09,
                 'batch_size': 10,
                 'input_dim': INPUT_DIM_PART_2,
                 'output_dim': OUTPUT_DIM_PART_2,
@@ -251,6 +248,26 @@ def main():
             y_val=y_val,
             y_test=y_test, 
             verbose = True) 
+            # # # ITERATIVE GRID SEARCH FOR THE TWO HYPERPARAMS :
+            # initial_middle_dims = [5, 6, 7, 8, 12]
+            # initial_lrs = [0.01, 0.050075, 0.06, 0.07, 0.09, 0.2]
+            # best_lr, best_middle_dim, best_n_epo = iterative_grid_search_p2(
+            # X_train=X_train,
+            # X_val=X_val,
+            # X_test=X_test,
+            # y_train=y_train,
+            # y_val=y_val,
+            # y_test=y_test, 
+            # initial_middle_dims=initial_middle_dims, 
+            # initial_lrs=initial_lrs, 
+            # iterations=3,      
+            # n_epochs=1000, 
+            # input_dim=5, 
+            # output_dim=3, 
+            # batch_size=10,
+            # refine_factor=0.5, 
+            # refine_points=5, 
+            # verbose=True)
             
             print(f"Best epoch to stop before overfit: {best_n_epo}")
             print(f"Best learning rate: {best_lr}")
@@ -280,8 +297,8 @@ def main():
                 'y_val': y_val,
                 'X_test': X_test,
                 'y_test': y_test,
-                'n_epochs': 2450,
-                'learning_rate': 0.06,
+                'n_epochs': 1062,
+                'learning_rate': 0.1,
                 'batch_size': 10,
                 'input_dim': INPUT_DIM_PART_3,
                 'output_dim': OUTPUT_DIM_PART_3,
@@ -292,7 +309,7 @@ def main():
     if exec_part_4_flg:
 
         print('Running : part 4' + '-' * 50)
-        create_data_kwargs = {'N': 300, 'input_dim': INPUT_DIM_PART_4, 'n_classes': 3, 'train_size': 0.6, 'val_size': 0.2, 'test_size': 0.2}
+        create_data_kwargs = {'N': 300, 'input_dim': INPUT_DIM_PART_4, 'n_classes': OUTPUT_DIM_PART_4, 'train_size': 0.6, 'val_size': 0.2, 'test_size': 0.2}
         X_train, X_val, X_test, y_train, y_val, y_test = data_creation(**create_data_kwargs)
         training_kwargs = {
             'X': X_train,
@@ -322,9 +339,9 @@ def main():
                 y_test=y_test,
                 verbose = True)
                       
-            print(f"\n\ntraining the model with the obtained hyper param:\n\n")
             print(f"Best epoch to stop before overfit: {best_n_epochs}")
             print(f"Best learning rate: {best_lr}")
+            print(f"Best middle dim num: {best_middle_dim}")
             
             training_kwargs = {
                 'X': X_train,
@@ -350,12 +367,12 @@ def main():
                 'y_val': y_val,
                 'X_test': X_test,
                 'y_test': y_test,
-                'n_epochs': 4000,
-                'learning_rate': 0.01,
+                'n_epochs': 3991,
+                'learning_rate': 0.4,
                 'batch_size': 30,
                 'input_dim': INPUT_DIM_PART_4,
                 'output_dim': OUTPUT_DIM_PART_4,
-                'middle_dim': 20,
+                'middle_dim': 7,
                 'loss_print': True}
             training_testing_sequential_multiclass(**training_kwargs) 
             
