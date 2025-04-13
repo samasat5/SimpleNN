@@ -38,7 +38,7 @@ This project has six files:
 | Flag           | Description                                                                                  |
 |----------------|----------------------------------------------------------------------------------------------|
 | `-p`, `--part` | **Required.** Select the part of the project to execute. Options: `1`, `2`, `3`, `4`, `all`. |
-| `--search`     | **Optional.** Perform hyperparameter search. Options: `learning_rate` for the part 1,2,3, and `learning_rate`, `middle_dim`, `both` for part 4. If omitted, the model runs with default or pre-selected parameters. |
+| `--search`     | **Optional.** Perform hyperparameter search. Options: `learning_rate` for the part 1,2,3, and `learning_rate`, `middle_dim`, `both` for part 4.|
 
 
 python main.py -p <part_number> [--search <param_name>]
