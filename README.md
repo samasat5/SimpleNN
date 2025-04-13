@@ -14,7 +14,7 @@ This script supports 4 different training modes:
 | 1    | Linear model             | Linear             | Binary              | -    | MSE   |
 | 2    | Shallow neural network   | Nonlinear (1 hidden layer) | Binary      | Sigmoid    | BCE   |
 | 3    | Deep neural network      | MLP (Multi-layer)  | Binary              | Sigmoid    | BCE   |
-| 4    | Deep neural network      | MLP (Multi-layer)  | Multiclass          | Softmax    | Cross-Entropy          |
+| 4    | Deep neural network      | MLP (Multi-layer)  | Multiclass (3 classes)          | Softmax    | Cross-Entropy          |
 
 
 Each part generates random data, trains the model, evaluates it, and plots the training/validation/test loss.
