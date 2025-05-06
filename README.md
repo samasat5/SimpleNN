@@ -17,7 +17,7 @@ This script supports 4 different training modes:
 | 4    | Deep neural network      | MLP (2-layer)  | Multiclass (3 classes)          | Softmax    | Cross-Entropy          |
 | 5    | Deep neural network      | Autoencoder | _         | _    | BCE          |
 
-Each part generates random data, trains the model, evaluates it, and plots the training/validation/test loss.
+Each part generates random data, trains the model, evaluates it, and plots the training/validation loss.
 
 This project has six files: 
 - `layers.py` – Defines the linear and nonlinear neural network layers (e.g., Linear, TanH, Sigmoide, Softmax, and Sequential)
