@@ -1,4 +1,4 @@
-from training import training_loop_linear_binary, training_testing_nonlinear_binary, training_testing_sequential_binary, training_testing_sequential_multiclass
+from training import training_loop_linear_binary, training_testing_nonlinear_binary, training_testing_sequential_binary, training_testing_sequential_multiclass, training_testing_autoencoder
 from losses import BCELoss, MSELoss, CrossEntropyLoss
 from layers import Linear, TanH, Sigmoide, Sequential, Optim
 from data_utils import data_creation, init_random_seed
@@ -7,6 +7,8 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
+import itertools
+import pdb
 
 
 def param_search_p1(param, X_train, X_val, X_test, y_train, y_val, y_test, verbose = True):
@@ -40,7 +42,7 @@ def param_search_p1(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
             }
             
             _, val_loss_list, _= training_loop_linear_binary(**training_kwargs)
-            final_val_losses.append(val_loss_list[-1]) 
+            # final_val_losses.append(val_loss_list[-1]) 
             average_losses.append(np.mean(val_loss_list[-10:]))  # average the val losses for each lr ( to compare the performance of lr)
             if verbose: 
                 plt.plot(val_loss_list, label=f' learning_rate:{learning_rate:1e}')
@@ -472,6 +474,7 @@ def param_search_p3(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
             }
 
         _, val_loss_list = training_testing_sequential_binary(**training_kwargs)
+        pdb.set_trace()
         best_n_epo = np.argmin(val_loss_list)
         
         if verbose :
@@ -698,6 +701,63 @@ def param_search_p4(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
         
 
 
+def param_search_p5(param, X_train, X_val, X_test, y_train, y_val, y_test, verbose = True):
+
+    if param == "LR_and_middleDim_and_latentDim":
+
+        learning_rates = [1e-2, 2e-2, 3e-2, 1e-3]
+        middle_dims    = [240, 220, 100, 50]
+        latent_dims    = [120, 90, 70, 50]
+
+        # Making a grid of all combinations
+        param_grid = list(itertools.product(learning_rates, middle_dims, latent_dims))
+        best_val_acc = 0
+        best_params = None
+        best_val_loss = float("inf")
+
+        for lr, middle, latent in param_grid:
+
+            encoder = Sequential(
+                Linear(784, middle), TanH(),
+                Linear(middle, latent), TanH())
+            decoder = Sequential(
+                Linear(latent, middle), TanH(),
+                Linear(middle, 784), Sigmoide())
+
+
+            _, val_loss_list, val_acc = training_testing_autoencoder(
+                X_train, X_test, X_val, y_train, y_test, y_val,
+                n_epochs=300,
+                learning_rate=lr,
+                batch_size=64,
+                input_dim=X_train.shape[1],
+                middle_dim=middle,
+                latent_dim=latent,
+                loss_print=False,
+                see_reconsturctedz_imgs=False, 
+                clustering_check = False) # Get final val loss from returned val_loss_list
+
+            val_loss = np.mean(val_loss_list)
+            print(f"Training with lr={lr}, middle_dim={middle}, latent_dim={latent} -- val_acc={val_acc:3f}, val_loss={val_loss:3f}")
+
+            if val_acc > best_val_acc:
+                best_val_acc = val_acc
+                best_params = (lr, middle, latent)
+            if val_acc == best_val_acc :
+                if val_loss < best_val_loss:
+                    best_val_loss = val_loss
+                    best_params = (lr, middle, latent)
+                    
+
+        best_n_epochs = np.argmin(val_loss_list)
+        
+        if verbose == True:
+            print(f"\nBest config: lr={best_params[0]}, middle={best_params[1]}, latent={best_params[2]} (val_acc={best_val_acc:.4f})")
+            print(f"Best timestep to stop (the best n_epoch) is {best_n_epochs}")
+            
+            
+        return best_params[0], best_params[1], best_params[2], best_n_epochs
+        
     
 
 

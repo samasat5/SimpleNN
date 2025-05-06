@@ -3,16 +3,19 @@ from layers import Linear, TanH, Sigmoide, Sequential, Optim, Softmax
 import numpy as np
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
+from sklearn.manifold import TSNE
 from data_utils import visualize_data
 import pdb
 import copy
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.cluster import KMeans
 
 #-----------------------------------------
 # 1- Mon Premier Est Linéaire:------------
 #-----------------------------------------
 def training_loop_linear_binary(
-        X, y, X_val, y_val, X_test, y_test, n_epochs = 1000, learning_rate = 1e-2, batch_size = 10, input_dim = 3, output_dim = 1, loss_print = False
-):
+        X, y, X_val, y_val, X_test, y_test, n_epochs = 1000, learning_rate = 1e-2, batch_size = 10, input_dim = 3, output_dim = 1, loss_print = False):
 
     print(f"Hyper parametrs of the model: - number of epochs: {n_epochs}, learning rate: {learning_rate:.4e}, batch size: {batch_size}:")
     
@@ -26,8 +29,6 @@ def training_loop_linear_binary(
     val_loss_list = []
     test_loss_list = []
     min_epoch_val_min = None
-    
-    # val_min_loss_per_epoch_list = []
     
     best_model = None
     best_val_loss = float('inf')
@@ -322,3 +323,260 @@ def training_testing_sequential_multiclass(X, y, X_test, y_test, X_val, y_val, n
         plt.show()
     
     return train_loss_list, val_loss_list
+
+
+#-----------------------------------------
+# 5- Mon cinquième se compresse:----------
+#-----------------------------------------
+def training_testing_autoencoder(X, X_test, X_val, y, y_test, y_val, n_epochs = 1000, learning_rate = 1e-2, batch_size = 10, 
+                                 input_dim = 256, middle_dim = 100, latent_dim=10, loss_print=False, 
+                                 see_reconsturctedz_imgs=False, clustering_check=False, display_latent_vis=False, do_denoised_test=False,
+                                 do_data_generation_test=False, do_inter_centroid_data_generation=False):
+    
+    encoder = Sequential(Linear(input_dim, middle_dim), TanH(), Linear(middle_dim, latent_dim), TanH())
+    decoder = Sequential(Linear(latent_dim, middle_dim), TanH(), Linear(middle_dim, input_dim), Sigmoide())
+    loss_fn = BCELoss()
+    
+    # define the training loop:
+    N = X.shape[0]
+    train_loss_list = []
+    val_loss_list = []
+    test_loss_list = []
+    acc_list = [] 
+    
+
+    
+    for epoch in range(n_epochs):
+        perm = np.random.permutation(N) 
+        X_shuffled = X[perm]
+        total_train_loss = 0
+        for i in range(0, N, batch_size):
+            batch_x = X_shuffled[i:i+batch_size]
+            
+            # forward :
+            x_enc = encoder.forward(batch_x)
+            x_pred = decoder.forward(x_enc)
+            loss = loss_fn.forward(batch_x, x_pred)
+            total_train_loss += loss.mean()
+            
+            # backward:
+            delta = loss_fn.backward(batch_x, x_pred) 
+            decoder.zero_grad()
+            decoder.backward_update_gradient(x_enc, delta)
+            decoder.update_parameters(learning_rate)
+            grad_z = decoder.backward_delta(x_enc, delta)
+            encoder.zero_grad()
+            encoder.backward_update_gradient(batch_x, grad_z)
+            encoder.update_parameters(learning_rate)
+            
+            
+        avg_train_loss = total_train_loss / (N / batch_size)
+        train_loss_list.append(avg_train_loss)
+
+        # validation loss
+        val_enc = encoder.forward(X_val)
+        val_pred = decoder.forward(val_enc)
+        val_loss = loss_fn.forward(X_val, val_pred).mean()
+        val_loss_list.append(val_loss)
+
+        # test loss
+        test_enc = encoder.forward(X_test)
+        test_pred = decoder.forward(test_enc)
+        test_loss = loss_fn.forward(X_test, test_pred).mean()
+        test_loss_list.append(test_loss)
+
+        if loss_print == True:
+            if epoch % 100 == 0 or epoch == n_epochs - 1:
+                print(f"Epoch {epoch} - Train Loss: {avg_train_loss:.4f} | Val Loss: {val_loss:.4f}")
+        
+        
+    # Plot
+    if loss_print:
+        plt.plot(train_loss_list, label="Training Loss")
+        plt.plot(val_loss_list, label="Validation Loss")
+        # plt.plot(test_loss_list, label="Test Loss", linestyle='--')
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss")
+        plt.title("Loss Curves of a Sequential model of Multiclass Classifier")
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+    
+    latent_X = encoder.forward(X)
+    knn = KNeighborsClassifier(n_neighbors=5)
+    knn.fit(latent_X, y) 
+    latent_X_val = encoder.forward(X_val)
+    y_pred = knn.predict(latent_X_val)
+    acc_val = np.mean(y_pred == y_val)
+    
+    if display_latent_vis:
+        X_2d = TSNE(n_components=2, random_state=42).fit_transform(latent_X)
+        unique_classes = np.unique(y)
+        plt.figure(figsize=(8, 6))
+        for cls in unique_classes:
+            idx = y == cls
+            plt.scatter(X_2d[idx, 0], X_2d[idx, 1], label=f"Class {cls}", alpha=0.8, edgecolor='k')
+        
+        # plt.scatter(X_2d[:, 0], X_2d[:, 1], c=y, cmap='Dark2', edgecolor='k', alpha=0.9)
+        plt.legend()
+        plt.title("2D Projection using PCA")
+        plt.xlabel("PC 1")
+        plt.ylabel("PC 2")
+        plt.grid(True)
+        plt.show()
+        
+        #pdb.set_trace()
+        pass
+    
+        
+    if clustering_check == "test":
+        latent_X = encoder.forward(X)
+        knn = KNeighborsClassifier(n_neighbors=5)
+        knn.fit(latent_X, y)
+        latent_X_test = encoder.forward(X_test)
+        y_pred = knn.predict(latent_X_test)
+        acc = np.mean(y_pred == y_test)
+        print(f"kNN test Accuracy on latent space: {acc:.4f}")
+        
+        
+    if see_reconsturctedz_imgs:
+        
+        n_samples = 8
+        sample_inputs = X_test[:n_samples]
+        encoded = encoder.forward(sample_inputs)
+        decoded = decoder.forward(encoded)
+        
+        latent_X = encoder.forward(X)
+        knn = KNeighborsClassifier(n_neighbors=5)
+        knn.fit(latent_X, y) 
+        latent_X_test = encoder.forward(X_test)
+        y_pred_test = knn.predict(latent_X_test)
+        
+        _, axes = plt.subplots(2, n_samples, figsize=(n_samples * 2, 4))
+
+        for i in range(n_samples):
+            # Original image
+            axes[0, i].imshow(sample_inputs[i].reshape(16, 16), cmap='gray')
+            axes[0, i].set_title(f"Original,\ntrue nb:{y_test[i]}")
+            axes[0, i].axis('off')
+            # Reconstructed image
+            axes[1, i].imshow(decoded[i].reshape(16, 16), cmap='gray')
+            axes[1, i].set_title(f"Reconst.,\npredicted nb:{y_pred_test[i]}")
+            axes[1, i].axis('off')
+
+        plt.tight_layout()
+        plt.show()
+
+    if do_denoised_test:
+        idx = np.random.randint(0, len(X))
+        original_img = X[idx]
+        
+        # Add Gaussian noise to the image
+        noise_factor = 0.5
+        noisy_img = original_img + noise_factor * np.random.normal(loc=0.0, scale=0.5, size=original_img.shape)
+        
+        # Clip the values to be between 0 and 1
+        noisy_img = np.clip(noisy_img, 0., 1.)
+        
+        noisy_img_enc = encoder.forward(noisy_img[None, :])
+        denoised_img = decoder.forward(noisy_img_enc)
+        
+
+        plt.figure(figsize=(12, 4))
+        
+        plt.subplot(1, 3, 1)
+        plt.imshow(original_img.reshape(16, 16), cmap='gray')
+        plt.title('Original Image')
+        plt.axis('off')
+        
+        plt.subplot(1, 3, 2)
+        plt.imshow(noisy_img.reshape(16, 16), cmap='gray')
+        plt.title('Noisy Image')
+        plt.axis('off')
+        
+        plt.subplot(1, 3, 3)
+        plt.imshow(denoised_img[0].reshape(16, 16), cmap='gray')
+        plt.title('Denoised Image')
+        plt.axis('off')
+        
+        plt.show()
+        pass
+    
+    if do_data_generation_test:
+        n_samples = 8
+        latent_samples = np.random.normal(size=(n_samples, latent_dim))
+        generated_imgs = decoder.forward(latent_samples)
+        
+        # Plot the generated images
+        plt.figure(figsize=(12, 4))
+        
+        for i in range(n_samples):
+            plt.subplot(2, n_samples, i + 1)
+            plt.imshow(generated_imgs[i].reshape(16, 16), cmap='gray')
+            plt.axis('off')
+        
+        plt.tight_layout()
+        plt.show()
+        
+        kmeans = KMeans(n_clusters=10, random_state=42)
+        kmeans.fit(latent_X)
+        centroids = {}
+        for label in np.unique(y):
+            centroids[label] = kmeans.cluster_centers_[label]
+        
+        # Generate 10 images for each of the 10 centroids
+        n_samples_per_centroid = 10
+        n_centroids = len(centroids)
+        generated_imgs = []
+        for label in np.unique(y):
+            centroid = centroids[label]
+            # Generate images close to each centroid
+            new_samples = np.random.normal(loc=centroid, scale=0.1, size=(n_samples_per_centroid, latent_dim))
+            generated_imgs.extend(decoder.forward(new_samples))
+        
+        # Plot in a 10x10 grid
+        plt.figure(figsize=(15, 15))
+        for i in range(n_centroids * n_samples_per_centroid):
+            plt.subplot(n_centroids, n_samples_per_centroid, i + 1)
+            plt.imshow(generated_imgs[i].reshape(16, 16), cmap='gray')
+            plt.axis('off')
+            
+        plt.tight_layout()
+        plt.show()
+
+    
+    if do_inter_centroid_data_generation:
+        # Take two centroid in the latent space, and uniformly sample points between them
+        # Generate new images by sampling from the latent space close to the centroids associated with each label
+        # Get the centroids of the latent space for each label from the trained KNN
+        # Fit KMeans to get centroids in latent space
+        kmeans = KMeans(n_clusters=10, random_state=42)
+        kmeans.fit(latent_X)
+        centroids = {}
+        for label in np.unique(y):
+            centroids[label] = kmeans.cluster_centers_[label]
+        
+        # Randomly sample two centroids
+        centroid_1 = centroids[0]
+        centroid_2 = centroids[1]
+        
+        # Uniformly sample points between the two centroids
+        n_samples = 10
+        points = np.linspace(centroid_1, centroid_2, n_samples)
+        
+        # Generate new images by sampling from the latent space close to the centroids associated with each label
+        generated_imgs = decoder.forward(points)     
+        
+        plt.figure(figsize=(12, 4))
+        
+        for i in range(n_samples):
+            plt.subplot(2, n_samples, i + 1)
+            plt.imshow(generated_imgs[i].reshape(16, 16), cmap='gray')
+            plt.axis('off')
+            
+        plt.tight_layout()
+        plt.show()
+        
+        
+    
+    return train_loss_list, val_loss_list, acc_val

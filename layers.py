@@ -16,7 +16,7 @@ class Linear(object):
     def __init__(self, input_dim, output_dim):
         init_random_seed()
         self._parameters = {
-            'W': np.random.randn(input_dim, output_dim) * np.sqrt(2 / input_dim),
+            'W': np.random.randn(input_dim, output_dim) * np.sqrt(1 / input_dim),
             'b': np.zeros((1, output_dim))}
         self._gradient = {
             'W': np.zeros_like(self._parameters['W']),
@@ -100,7 +100,10 @@ class Module:
 
     def update_parameters(self, gradient_step=1e-3):
         pass
-
+    
+    def backward_delta(self, input, delta):
+        pass
+    
     def backward_update_gradient(self, input, delta):
         raise NotImplementedError
 
@@ -140,6 +143,21 @@ class Sequential(Module):
             x_input = activations[i]
             module.backward_update_gradient(x_input, delta)
             delta = module.backward_delta(x_input, delta)
+            
+    def backward_delta(self, input, delta):
+        # Forward pass to collect activations
+        activations = [input]
+        x = input
+        for module in self.modules:
+            x = module.forward(x)
+            activations.append(x)
+
+        # Backward pass to compute the delta to propagate
+        for i in reversed(range(len(self.modules))):
+            module = self.modules[i]
+            x_input = activations[i]
+            delta = module.backward_delta(x_input, delta)
+        return delta
 
     def update_parameters(self, gradient_step=1e-2):
         for module in self.modules:
@@ -169,7 +187,7 @@ class Sequential(Module):
         acc = np.mean(y_pred == y)
         print(f"{label} Accuracy: {acc * 100:.2f}%")
         return acc
-
+    
 
 #-----------------------------------------
 # The Activation Functions:---------------
