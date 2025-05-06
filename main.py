@@ -206,7 +206,7 @@ def main():
                 'y_val': y_val,
                 'X_test': X_test,
                 'y_test': y_test,
-                'n_epochs': 1062,
+                'n_epochs': 600,
                 'learning_rate': 0.09,
                 'batch_size': 10,
                 'input_dim': INPUT_DIM_PART_2,
