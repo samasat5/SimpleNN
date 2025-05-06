@@ -12,7 +12,7 @@ This script supports 4 different training modes:
 | Part | Description              | Model Type         | Classification     | Activation | Loss Function          |
 |------|--------------------------|--------------------|---------------------|------------|------------------------|
 | 1    | Linear model             | Linear             | Binary              | -    | MSE   |
-| 2    | Shallow neural network   | Nonlinear (1 hidden layer) | Binary      | Sigmoid    | BCE   |
+| 2    | Shallow neural network   | MLP (2-layer) | Binary      | Sigmoid    | BCE   |
 | 3    | Deep neural network      | MLP (2-layer)  | Binary              | Sigmoid    | BCE   |
 | 4    | Deep neural network      | MLP (2-layer)  | Multiclass (3 classes)          | Softmax    | Cross-Entropy          |
 | 5    | Deep neural network      | Autoencoder | _         | _    | Cross-Entropy          |
