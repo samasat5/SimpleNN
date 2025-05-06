@@ -13,9 +13,9 @@ This script supports 4 different training modes:
 |------|--------------------------|--------------------|---------------------|------------|------------------------|
 | 1    | Linear model             | Linear             | Binary              | -    | MSE   |
 | 2    | Shallow neural network   | Nonlinear (1 hidden layer) | Binary      | Sigmoid    | BCE   |
-| 3    | Deep neural network      | MLP (Multi-layer)  | Binary              | Sigmoid    | BCE   |
-| 4    | Deep neural network      | MLP (Multi-layer)  | Multiclass (3 classes)          | Softmax    | Cross-Entropy          |
-
+| 3    | Deep neural network      | MLP (2-layer)  | Binary              | Sigmoid    | BCE   |
+| 4    | Deep neural network      | MLP (2-layer)  | Multiclass (3 classes)          | Softmax    | Cross-Entropy          |
+| 5    | Deep neural network      | Autoencoder | _         | _    | Cross-Entropy          |
 
 Each part generates random data, trains the model, evaluates it, and plots the training/validation/test loss.
 
@@ -37,8 +37,8 @@ This project has six files:
 
 | Flag           | Description                                                                                  |
 |----------------|----------------------------------------------------------------------------------------------|
-| `-p` | **Required.** Select the part of the project to execute. Options: `1`, `2`, `3`, `4`, `all`. For each part, the models are trained with the best learning_rate,  middle dimention and the epoch to stop before it reaches overfit (that is why there are early stoppings)|
-| `--search`     | **Optional.** Perform hyperparameter search. Options: `learning_rate` for the part 1 and `LR_and_middleDim` for the part 2,3,4.|
+| `-p` | **Required.** Select the part of the project to execute. Options: `1`, `2`, `3`, `4`,`5`, `all`. For each part, the models are trained with the best learning_rate,  middle dimention latent dimension (for the part 5) and the epoch to stop before it reaches overfit (that is why there are early stoppings)|
+| `--search`     | **Optional.** Perform hyperparameter search. Options: `learning_rate` for the part 1, `LR_and_middleDim` for the part 2,3,4 and `LR_and_middleDim_and_latentDim` for the part 5.|
 
 
 python main.py -p <part_number> [--search <param_name>]
