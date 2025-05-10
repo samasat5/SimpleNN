@@ -330,8 +330,8 @@ def training_testing_sequential_multiclass(X, y, X_test, y_test, X_val, y_val, n
 #-----------------------------------------
 def training_testing_autoencoder(X, X_test, X_val, y, y_test, y_val, n_epochs = 1000, learning_rate = 1e-2, batch_size = 10, 
                                  input_dim = 256, middle_dim = 100, latent_dim=10, loss_print=False, 
-                                 see_reconsturctedz_imgs=False, clustering_check=False, display_latent_vis=False, do_denoised_test=False,
-                                 do_data_generation_test=False, do_inter_centroid_data_generation=False):
+                                 see_reconsturctedz_imgs=True, clustering_check=True, display_latent_vis=True, do_denoised_test=True,
+                                 do_inter_centroid_data_generation=True, do_data_generation_test=True):
     
     encoder = Sequential(Linear(input_dim, middle_dim), TanH(), Linear(middle_dim, latent_dim), TanH())
     decoder = Sequential(Linear(latent_dim, middle_dim), TanH(), Linear(middle_dim, input_dim), Sigmoide())
@@ -416,12 +416,14 @@ def training_testing_autoencoder(X, X_test, X_val, y, y_test, y_val, n_epochs = 
         for cls in unique_classes:
             idx = y == cls
             plt.scatter(X_2d[idx, 0], X_2d[idx, 1], label=f"Class {cls}", alpha=0.8, edgecolor='k')
-        
-        # plt.scatter(X_2d[:, 0], X_2d[:, 1], c=y, cmap='Dark2', edgecolor='k', alpha=0.9)
+            centroid = X_2d[idx].mean(axis=0)
+            plt.scatter(centroid[0], centroid[1], color='black', marker='X', s=100, label=f"Centroid {cls}")
+
+
         plt.legend()
-        plt.title("2D Projection using PCA")
-        plt.xlabel("PC 1")
-        plt.ylabel("PC 2")
+        plt.title("2D Projection")
+        plt.xlabel("compo 1")
+        plt.ylabel("compo2 2")
         plt.grid(True)
         plt.show()
         
@@ -468,6 +470,9 @@ def training_testing_autoencoder(X, X_test, X_val, y, y_test, y_val, n_epochs = 
         plt.show()
 
     if do_denoised_test:
+               
+        # 1) add noise to an image from the training set
+        # Select a random image from the training set
         idx = np.random.randint(0, len(X))
         original_img = X[idx]
         
@@ -478,10 +483,11 @@ def training_testing_autoencoder(X, X_test, X_val, y, y_test, y_val, n_epochs = 
         # Clip the values to be between 0 and 1
         noisy_img = np.clip(noisy_img, 0., 1.)
         
+        # 2) feed it to the AE
         noisy_img_enc = encoder.forward(noisy_img[None, :])
         denoised_img = decoder.forward(noisy_img_enc)
         
-
+        # 3) plot the reconstructed image
         plt.figure(figsize=(12, 4))
         
         plt.subplot(1, 3, 1)
@@ -503,6 +509,7 @@ def training_testing_autoencoder(X, X_test, X_val, y, y_test, y_val, n_epochs = 
         pass
     
     if do_data_generation_test:
+        # Generate new images by sampling from the latent space
         n_samples = 8
         latent_samples = np.random.normal(size=(n_samples, latent_dim))
         generated_imgs = decoder.forward(latent_samples)
@@ -518,6 +525,8 @@ def training_testing_autoencoder(X, X_test, X_val, y, y_test, y_val, n_epochs = 
         plt.tight_layout()
         plt.show()
         
+        # Get the centroids of the latent space for each label from the trained KNN
+        # Fit KMeans to get centroids in latent space
         kmeans = KMeans(n_clusters=10, random_state=42)
         kmeans.fit(latent_X)
         centroids = {}
@@ -533,6 +542,7 @@ def training_testing_autoencoder(X, X_test, X_val, y, y_test, y_val, n_epochs = 
             # Generate images close to each centroid
             new_samples = np.random.normal(loc=centroid, scale=0.1, size=(n_samples_per_centroid, latent_dim))
             generated_imgs.extend(decoder.forward(new_samples))
+
         
         # Plot in a 10x10 grid
         plt.figure(figsize=(15, 15))
@@ -541,10 +551,11 @@ def training_testing_autoencoder(X, X_test, X_val, y, y_test, y_val, n_epochs = 
             plt.imshow(generated_imgs[i].reshape(16, 16), cmap='gray')
             plt.axis('off')
             
+
+            
         plt.tight_layout()
         plt.show()
 
-    
     if do_inter_centroid_data_generation:
         # Take two centroid in the latent space, and uniformly sample points between them
         # Generate new images by sampling from the latent space close to the centroids associated with each label
@@ -573,10 +584,6 @@ def training_testing_autoencoder(X, X_test, X_val, y, y_test, y_val, n_epochs = 
             plt.subplot(2, n_samples, i + 1)
             plt.imshow(generated_imgs[i].reshape(16, 16), cmap='gray')
             plt.axis('off')
-            
-        plt.tight_layout()
-        plt.show()
-        
         
     
     return train_loss_list, val_loss_list, acc_val

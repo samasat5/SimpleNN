@@ -16,7 +16,7 @@ def param_search_p1(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
     best_lr = 2e-00
 
     if param == "learning_rate": 
-        learning_rates = np.linspace(0.00001, 0.05, 10)
+        learning_rates = np.linspace(0.00001, 0.0001, 10)
         if verbose:
             print (f"learning rates to check: np.linspace(0.0001, 0.05, 5) ")
             
@@ -163,8 +163,8 @@ def param_search_p2(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
         return best_n_epochs, best_lr
     
     elif param == "LR_and_middleDim":
-        middle_dims = [5, 6, 7, 8, 12, 20]
-        learning_rates = [0.01, 0.050075, 0.06, 0.07, 0.09, 0.2]
+        middle_dims = [3, 5, 6, 7, 8, 12]
+        learning_rates = [ 0.050075, 0.06, 0.07, 0.09, 0.2, 0.3]
         results = {}
 
         for dim in middle_dims:
@@ -413,8 +413,8 @@ def param_search_p3(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
         return best_n_epochs, best_lr
     
     elif param == "LR_and_middleDim":
-        middle_dims = [3, 7, 8, 12]
-        learning_rates = [0.005, 0.01, 0.05, 0.06, 0.09, 0.1]
+        middle_dims = [1, 2,3,4, 6]
+        learning_rates = [ 0.09, 0.1, 0.3, 0.5]
         results = {}
 
         for dim in middle_dims:
@@ -474,7 +474,6 @@ def param_search_p3(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
             }
 
         _, val_loss_list = training_testing_sequential_binary(**training_kwargs)
-        pdb.set_trace()
         best_n_epo = np.argmin(val_loss_list)
         
         if verbose :
@@ -631,7 +630,7 @@ def param_search_p4(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
     
     
     elif param == "LR_and_middleDim":
-        middle_dims = [3, 7, 11, 12, 13, 20]
+        middle_dims = [2, 3, 4, 7, 11, 12]
         learning_rates = [ 0.005, 0.05, 0.08, 0.4, 0.6, 0.8]
         results = {}
 

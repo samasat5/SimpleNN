@@ -214,20 +214,20 @@ def main():
                 'middle_dim' : 7,
                 'loss_print': True}
             
-            # training_kwargs = {
-            #     'X': X_train,
-            #     'y': y_train,
-            #     'X_val': X_val,
-            #     'y_val': y_val,
-            #     'X_test': X_test,
-            #     'y_test': y_test,
-            #     'n_epochs': 16,
-            #     'learning_rate': 0.050075,
-            #     'batch_size': 10,
-            #     'input_dim': INPUT_DIM_PART_2,
-            #     'output_dim': OUTPUT_DIM_PART_2,
-            #     'middle_dim' : 6,
-            #     'loss_print': True}
+            training_kwargs = {
+                'X': X_train,
+                'y': y_train,
+                'X_val': X_val,
+                'y_val': y_val,
+                'X_test': X_test,
+                'y_test': y_test,
+                'n_epochs': 1000,
+                'learning_rate': 0.06,
+                'batch_size': 10,
+                'input_dim': INPUT_DIM_PART_2,
+                'output_dim': OUTPUT_DIM_PART_2,
+                'middle_dim' : 5,
+                'loss_print': True}
             # training_kwargs = {
             #     'X': X_train,
             #     'y': y_train,
@@ -327,12 +327,12 @@ def main():
                 'y_val': y_val,
                 'X_test': X_test,
                 'y_test': y_test,
-                'n_epochs': 600,
+                'n_epochs': 2000,
                 'learning_rate': 0.1,
-                'batch_size': 10,
+                'batch_size': 64,
                 'input_dim': INPUT_DIM_PART_3,
                 'output_dim': OUTPUT_DIM_PART_3,
-                'middle_dim' : 7,
+                'middle_dim' : 3,
                 'loss_print': True}
             # training_kwargs = {
             #     'X': X_train,
@@ -341,12 +341,12 @@ def main():
             #     'y_val': y_val,
             #     'X_test': X_test,
             #     'y_test': y_test,
-            #     'n_epochs': 159,
-            #     'learning_rate': 0.005,
+            #     'n_epochs': 1000,
+            #     'learning_rate': 0.5,
             #     'batch_size': 10,
             #     'input_dim': INPUT_DIM_PART_3,
             #     'output_dim': OUTPUT_DIM_PART_3,
-            #     'middle_dim' :3,
+            #     'middle_dim' :1,
             #     'loss_print': True}
             training_testing_sequential_binary(**training_kwargs)
 
@@ -417,6 +417,21 @@ def main():
                 'input_dim': INPUT_DIM_PART_4,
                 'output_dim': OUTPUT_DIM_PART_4,
                 'middle_dim': 7,
+                'loss_print': True}
+            
+            training_kwargs = {
+                'X': X_train,
+                'y': y_train,
+                'X_val': X_val,
+                'y_val': y_val,
+                'X_test': X_test,
+                'y_test': y_test,
+                'n_epochs': 2451,
+                'learning_rate': 0.08,
+                'batch_size': 30,
+                'input_dim': INPUT_DIM_PART_4,
+                'output_dim': OUTPUT_DIM_PART_4,
+                'middle_dim': 11,
                 'loss_print': True}
             training_testing_sequential_multiclass(**training_kwargs) 
             
