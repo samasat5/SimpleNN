@@ -16,7 +16,8 @@ def param_search_p1(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
     best_lr = 2e-00
 
     if param == "learning_rate": 
-        learning_rates = np.linspace(0.0000001, 0.0001, 10)
+        # learning_rates = np.linspace(0.0000001, 0.0001, 10)
+        learning_rates = np.linspace(0.0000001, 0.00003, 10)
         if verbose:
             print (f"learning rates to check: np.linspace(0.0001, 0.05, 5) ")
             
