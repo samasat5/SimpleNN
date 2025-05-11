@@ -103,11 +103,13 @@ def visualize_data(X, y, title="Data Visualization"):
 
 
 def loading_MNISTimages(flatten=True, total_samples=10000, val_ratio=0.1, test_ratio=0.2):
-    # Define transform: resize to 16x16 and convert to tensor
+    # Define transform
     transform = transforms.Compose([
         transforms.Resize((16, 16)),
         transforms.ToTensor(), ])
-
+    # transform = transforms.Compose([
+    #     transforms.ToTensor(),  # No resizing here
+    # ])
     # Load full dataset with transform
     mnist_data = MNIST(root='./data', train=True, download=True, transform=transform)
 

@@ -16,15 +16,17 @@ def param_search_p1(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
     best_lr = 2e-00
 
     if param == "learning_rate": 
-        learning_rates = np.linspace(0.00001, 0.0001, 10)
+        learning_rates = np.linspace(0.0000001, 0.0001, 10)
         if verbose:
             print (f"learning rates to check: np.linspace(0.0001, 0.05, 5) ")
             
-        final_val_losses = []
+
         average_losses = []
+        all_val_losses = []
+        
         for learning_rate in learning_rates: 
             if verbose:
-                print(f"→ Trying learning rate: {learning_rate:.2e}")
+                print(f"→ Trying learning rate: {learning_rate:.10f}")
             
             training_kwargs = {
                 'X': X_train,
@@ -43,23 +45,35 @@ def param_search_p1(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
             
             _, val_loss_list, _= training_loop_linear_binary(**training_kwargs)
             # final_val_losses.append(val_loss_list[-1]) 
-            average_losses.append(np.mean(val_loss_list[-10:]))  # average the val losses for each lr ( to compare the performance of lr)
-            if verbose: 
-                plt.plot(val_loss_list, label=f' learning_rate:{learning_rate:1e}')
-        if verbose:    
-            plt.xlabel("LR")
+            # average_losses.append(np.mean(val_loss_list[-10:]))  # average the val losses for each lr ( to compare the performance of lr)
+            
+            _, val_loss_list, _ = training_loop_linear_binary(**training_kwargs)
+            avg_loss = np.mean(val_loss_list[-10:])
+            average_losses.append(avg_loss)
+            all_val_losses.append((learning_rate, val_loss_list))
+                
+                
+        # Find best learning rates
+        best_by_avg = learning_rates[np.argmin(average_losses)]
+        best_lr = best_by_avg
+        if verbose: 
+            print(f"→ Best LR by average of last 10 epochs: {best_by_avg:.8f}")
+            
+        if verbose:
+            for lr, losses in all_val_losses:
+                if lr == best_lr:
+                    plt.plot(losses, linestyle='--', linewidth=2, marker='o', color='darkred', label=f'Best LR: {lr:7f}')
+                else:
+                    plt.plot(losses, linestyle='-', linewidth=1, label=f'LR: {lr:7f}')
+
+            plt.xlabel("Epochs")
             plt.ylabel("Validation Loss")
             plt.title("Effect of LR on Validation Loss")
             plt.legend()
             plt.grid(True)
             plt.tight_layout()
             plt.show()
-            
-        # Find best learning rates
-        best_by_avg = learning_rates[np.argmin(average_losses)]
-        best_lr = best_by_avg
-        if verbose: 
-            print(f"→ Best LR by average of last 10 epochs: {best_by_avg:.4e}")
+
         
         # Choosing the min average :
         training_kwargs = {
@@ -734,7 +748,11 @@ def param_search_p5(param, X_train, X_val, X_test, y_train, y_val, y_test, verbo
                 latent_dim=latent,
                 loss_print=False,
                 see_reconsturctedz_imgs=False, 
-                clustering_check = False) # Get final val loss from returned val_loss_list
+                clustering_check = False,
+                display_latent_vis= False,
+                do_denoised_test= False,
+                do_data_generation_test= False,
+                do_inter_centroid_data_generation= False)
 
             val_loss = np.mean(val_loss_list)
             print(f"Training with lr={lr}, middle_dim={middle}, latent_dim={latent} -- val_acc={val_acc:3f}, val_loss={val_loss:3f}")

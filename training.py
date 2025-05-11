@@ -76,11 +76,11 @@ def training_loop_linear_binary(
                 
         
         
-        
-    # Get the test score of the model:
-    model.score(X_test, y_test, Activation_func=None, label="Test")
-    # Get the train score of the model:
-    model.score(X, y, Activation_func=None, label="Train")
+    if loss_print :
+        # Get the test score of the model:
+        model.score(X_test, y_test, Activation_func=None, label="Test")
+        # Get the train score of the model:
+        model.score(X, y, Activation_func=None, label="Train")
     
     
     if loss_print == True:
